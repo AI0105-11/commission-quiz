@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6d5a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="佣金速記">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>佣金速記</title>
+<style>
+:root{
+  --bg:#f5f3ee; --surface:#ffffff; --surface2:#efece5; --ink:#1b1d22; --muted:#6c6f77;
+  --line:#e3dfd6; --accent:#2f6d5a; --accent-ink:#ffffff; --accent-soft:#dcebe5;
+  --good:#1d8a57; --good-soft:#dff3e8; --bad:#cf3a3a; --bad-soft:#fbe4e2;
+  --shadow:0 1px 2px rgba(20,20,20,.05),0 4px 14px rgba(20,20,20,.05);
+  --radius:16px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121417; --surface:#1b1e22; --surface2:#24282d; --ink:#eceae5; --muted:#9a9ea6;
+    --line:#2e3238; --accent:#5fb394; --accent-ink:#0d1a15; --accent-soft:#1d3a30;
+    --good:#4cc488; --good-soft:#163527; --bad:#ff6b63; --bad-soft:#3d1c1b;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121417; --surface:#1b1e22; --surface2:#24282d; --ink:#eceae5; --muted:#9a9ea6;
+  --line:#2e3238; --accent:#5fb394; --accent-ink:#0d1a15; --accent-soft:#1d3a30;
+  --good:#4cc488; --good-soft:#163527; --bad:#ff6b63; --bad-soft:#3d1c1b;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:16px;line-height:1.5;min-height:100vh;min-height:100dvh;
+}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.wrap{max-width:520px;margin:0 auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom))}
+.hidden{display:none!important}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 14px}
+.brand{font-weight:800;font-size:22px;letter-spacing:.5px}
+.brand small{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.pill{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+.pill.warn{background:#fff1cc;color:#7a5a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.warn{background:#3a3110;color:#f3d77a}}
+
+/* cards / sections */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.sec-title{font-size:13px;font-weight:700;color:var(--muted);margin:0 0 10px;letter-spacing:.5px}
+.row-between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  min-height:40px;padding:8px 14px;border-radius:12px;border:1.5px solid var(--line);
+  background:var(--surface);font-weight:600;font-size:15px;transition:all .12s;
+}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.c-cht[aria-pressed="true"]{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.chip.c-twm[aria-pressed="true"]{background:#e8710a;border-color:#e8710a;color:#fff}
+.chip.c-fet[aria-pressed="true"]{background:#d11f3a;border-color:#d11f3a;color:#fff}
+.chip.sm{min-height:34px;padding:5px 11px;font-size:14px;border-radius:10px}
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;min-height:38px;border-radius:9px;font-weight:600;font-size:15px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+details.plans summary{list-style:none;cursor:pointer;font-size:14px;color:var(--accent);font-weight:600;padding:4px 0}
+details.plans summary::-webkit-details-marker{display:none}
+.plan-group{margin-top:10px}
+.plan-group h4{margin:0 0 6px;font-size:13px;color:var(--muted)}
+
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;
+  border-radius:14px;font-weight:700;font-size:17px;background:var(--accent);color:var(--accent-ink);
+}
+.btn:disabled{opacity:.4}
+.btn.ghost{background:var(--surface2);color:var(--ink)}
+.btn.danger{background:var(--bad-soft);color:var(--bad)}
+.btn.sm{min-height:42px;font-size:15px;width:auto;padding:0 16px}
+.hint{font-size:13px;color:var(--muted);text-align:center;margin:10px 0 0}
+
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:40px}
+.switch input{appearance:none;width:46px;height:28px;border-radius:99px;background:var(--line);position:relative;transition:.15s;flex:none;cursor:pointer}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch input:checked{background:var(--accent)}
+.switch input:checked::after{left:21px}
+
+/* bottom nav */
+.nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav-in{max-width:520px;margin:0 auto;display:flex}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:12px;color:var(--muted);font-weight:600;position:relative}
+.nav button svg{width:24px;height:24px}
+.nav button[aria-current="page"]{color:var(--accent)}
+.nav .dot{position:absolute;top:4px;left:calc(50% + 8px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;line-height:18px}
+
+/* quiz */
+.qbar{display:flex;align-items:center;gap:12px;padding:4px 0 14px}
+.qbar .x{width:40px;height:40px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;flex:none}
+.prog{flex:1;height:8px;border-radius:8px;background:var(--surface2);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:8px;transition:width .25s}
+.qcount{font-size:14px;color:var(--muted);font-weight:600;white-space:nowrap}
+.qcard{
+  background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);
+  padding:20px 18px 18px;position:relative;overflow:hidden;margin-bottom:14px;
+}
+.qcard::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--cc,var(--accent))}
+.carrier{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:15px;color:var(--cc)}
+.carrier::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--cc)}
+.qplan{font-size:32px;font-weight:800;line-height:1.2;margin:6px 0 12px;letter-spacing:.5px}
+.qtags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:17px;font-weight:700;padding:6px 14px;border-radius:10px;background:var(--surface2)}
+.tag.t0{background:#e3edff;color:#1d4fa3}
+.tag.t1{background:#e4f5ea;color:#1c7a47}
+.tag.t2{background:#f6ebff;color:#7a3aa8}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .tag.t0{background:#1c2a44;color:#9cc0ff}
+  :root:not([data-theme="light"]) .tag.t1{background:#17352a;color:#8fdcb0}
+  :root:not([data-theme="light"]) .tag.t2{background:#33213f;color:#d6a8f5}
+}
+.qask{margin-top:14px;font-size:15px;color:var(--muted)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{
+  min-height:68px;border-radius:16px;background:var(--surface);border:2px solid var(--line);
+  font-size:24px;font-weight:800;box-shadow:var(--shadow);transition:transform .08s,background .12s;
+  display:flex;align-items:center;justify-content:center;gap:4px;
+}
+.opt small{font-size:13px;font-weight:600;color:var(--muted)}
+.opt:active{transform:scale(.97)}
+.opt.ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.opt.ng{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.opt.dim{opacity:.45}
+.opt:disabled{cursor:default}
+.verdict{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;margin:16px 2px 10px}
+.verdict.ok{color:var(--good)}
+.verdict.ng{color:var(--bad)}
+.next-dock{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 70%,transparent);z-index:15}
+.next-dock .btn{max-width:488px;margin:0 auto}
+
+/* tables */
+.rt{width:100%;border-collapse:separate;border-spacing:0;font-size:15px}
+.rt th,.rt td{padding:9px 6px;text-align:center;border-bottom:1px solid var(--line)}
+.rt th{font-size:12px;color:var(--muted);font-weight:700}
+.rt td:first-child,.rt th:first-child{text-align:left;color:var(--muted);font-weight:600;font-size:14px}
+.rt tr:last-child td{border-bottom:0}
+.rt td.v{font-weight:700}
+.rt td.hl{background:var(--accent-soft);color:var(--accent);border-radius:8px;outline:2px solid var(--accent);outline-offset:-2px}
+.rt td.na{color:var(--muted);font-weight:400}
+.rt td.cover{cursor:pointer}
+.rt td.cover span{display:inline-block;min-width:52px;border-radius:6px;background:var(--surface2);color:transparent;user-select:none}
+.plan-card h3{margin:0 0 6px;font-size:18px;display:flex;align-items:center;gap:8px}
+
+/* lists */
+.list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.list-item:last-child{border-bottom:0}
+.li-main{flex:1;min-width:0}
+.li-title{font-weight:700}
+.li-sub{font-size:13px;color:var(--muted)}
+.li-ans{font-weight:800;font-size:18px}
+.badge-n{font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--bad-soft);color:var(--bad);white-space:nowrap}
+.empty{text-align:center;color:var(--muted);padding:28px 10px}
+.empty b{display:block;font-size:40px;margin-bottom:6px}
+
+.big-stat{display:flex;gap:10px}
+.big-stat div{flex:1;background:var(--surface2);border-radius:14px;padding:12px;text-align:center}
+.big-stat b{display:block;font-size:26px}
+.big-stat span{font-size:12px;color:var(--muted)}
+.bar{height:10px;border-radius:10px;background:var(--surface2);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;border-radius:10px}
+.stat-row{padding:10px 0}
+
+/* lock */
+.lock{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:24px 20px;max-width:420px;margin:0 auto}
+.lock .logo{width:72px;height:72px;border-radius:20px;background:var(--accent);display:grid;place-items:center;margin-bottom:18px}
+.lock h1{margin:0 0 4px;font-size:26px}
+.lock p{margin:0 0 22px;color:var(--muted)}
+.field{width:100%;min-height:54px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-size:18px;padding:0 16px;margin-bottom:12px;outline:none}
+.field:focus{border-color:var(--accent)}
+.err{color:var(--bad);font-size:14px;min-height:22px;margin:-4px 0 8px}
+.summary-score{text-align:center;padding:10px 0 4px}
+.summary-score b{font-size:56px;line-height:1}
+.summary-score div{color:var(--muted)}
+@keyframes pop{0%{transform:scale(.96);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .18s ease-out}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .25s}
+.qbar .x{color:var(--muted)}
+.hist-item{border-bottom:1px solid var(--line);padding:12px 0}
+.hist-item:last-child{border-bottom:0}
+.hist-item summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px}
+.hist-item summary::-webkit-details-marker{display:none}
+.hist-item .when{flex:1;font-size:14px;color:var(--muted)}
+.hist-item .sc{font-weight:800;font-size:18px}
+.hist-item .pct{min-width:52px;text-align:right;font-weight:700;font-size:14px;padding:2px 8px;border-radius:99px}
+.pct.hi{background:var(--good-soft);color:var(--good)}
+.pct.mid{background:#fff1cc;color:#7a5a00}
+.pct.lo{background:var(--bad-soft);color:var(--bad)}
+.hist-item .li-sub{margin-top:8px}
+.back{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--accent);min-height:40px}
+</style>
+</head>
+<body>
+
+<!-- 密碼鎖 -->
+<section id="lock" class="lock hidden">
+  <div class="logo"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+  <h1>佣金速記</h1>
+  <p>請輸入密碼解鎖</p>
+  <form id="lockForm" autocomplete="off">
+    <input id="pw" class="field" type="password" inputmode="numeric" placeholder="密碼" autocomplete="current-password">
+    <div id="pwErr" class="err"></div>
+    <label class="switch" style="margin-bottom:14px"><span>記住這台裝置</span><input id="remember" type="checkbox" checked></label>
+    <button class="btn" type="submit" id="unlockBtn">解鎖</button>
+  </form>
+</section>
+
+<!-- 作答畫面 -->
+<section id="quiz" class="hidden">
+  <div class="wrap">
+    <div class="qbar">
+      <button class="x" id="histBtn" aria-label="過往紀錄"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
+      <div class="prog"><i id="progBar"></i></div>
+      <div class="qcount num" id="qCount"></div>
+    </div>
+    <div id="qBody"></div>
+  </div>
+  <div class="next-dock hidden" id="nextDock"><button class="btn" id="nextBtn">下一題</button></div>
+</section>
+
+<!-- 結算 -->
+<section id="summary" class="hidden"><div class="wrap" id="summaryBody"></div></section>
+
+<!-- 過往紀錄 -->
+<section id="history" class="hidden"><div class="wrap" id="historyBody"></div></section>
+
+<script src="data.enc.js"></script>
+<script>
+(() => {
+"use strict";
+const TYPES = ["攜碼", "新辦", "續約"];
+const PERIODS = ["24", "30", "36", "48"];
+const ROUND = 20;
+const AUTO_NEXT_MS = 1200;
+
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pad = (n) => String(n).padStart(2, "0");
+const fmtTime = (t) => { const d = new Date(t); return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+
+let DATA = null, ITEMS = [], BYKEY = {};
+let hist = LS.get("cq_hist", []);           // 每輪紀錄：{at, c:答對, n:題數, w:[答錯題目]}
+let session = null;
+
+/* ---------- 解密 ---------- */
+const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+async function decrypt(pw) {
+  const E = window.ENC_DATA, enc = new TextEncoder();
+  const bk = await crypto.subtle.importKey("raw", enc.encode(pw), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: b64(E.salt), iterations: E.iter || 200000, hash: "SHA-256" },
+    bk, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(E.iv) }, key, b64(E.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function boot() {
+  if (!window.ENC_DATA) return showLockError("找不到資料檔 data.enc.js");
+  if (!window.crypto || !crypto.subtle) return showLockError("此網址不支援加密功能，請用 https 網址開啟");
+  const saved = LS.get("cq_pw", null);
+  if (saved) { try { DATA = await decrypt(saved); return start(); } catch (e) { LS.del("cq_pw"); } }
+  $("#lock").classList.remove("hidden");
+  setTimeout(() => $("#pw").focus(), 50);
+}
+function showLockError(msg) { $("#lock").classList.remove("hidden"); $("#pwErr").textContent = msg; }
+$("#lockForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const pw = $("#pw").value; if (!pw) return;
+  $("#unlockBtn").disabled = true; $("#unlockBtn").textContent = "解鎖中…";
+  try {
+    DATA = await decrypt(pw);
+    if ($("#remember").checked) LS.set("cq_pw", pw);
+    $("#lock").classList.add("hidden");
+    start();
+  } catch (err) {
+    $("#pwErr").textContent = "密碼錯誤";
+    $("#lockForm").classList.remove("shake"); void $("#lockForm").offsetWidth; $("#lockForm").classList.add("shake");
+  }
+  $("#unlockBtn").disabled = false; $("#unlockBtn").textContent = "解鎖";
+});
+
+/* ---------- 資料整理 ---------- */
+function buildItems() {
+  ITEMS = []; BYKEY = {};
+  for (const c of DATA.carriers) for (const p of c.plans) for (const per of PERIODS) {
+    const r = p.rates[per]; if (!r) continue;
+    r.forEach((v, t) => {
+      if (v === null || v === undefined || v === "") return;
+      const it = { key: `${c.id}|${p.name}|${per}|${t}`, c, p, per, t, ans: Number(v) };
+      ITEMS.push(it); BYKEY[it.key] = it;
+    });
+  }
+}
+function start() {
+  buildItems();
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
+  startRound();
+}
+
+/* ---------- 平均抽題 ----------
+   20 題中：三家電信各約 7 題、四種期數各 5 題、三種類型各約 7 題，
+   同一家電信內的方案輪流出現，順序完全隨機。不參考過往紀錄。 */
+function spread(list, n) { let out = []; while (out.length < n) out = out.concat(shuffle(list)); return shuffle(out.slice(0, n)); }
+function buildRound(n) {
+  const carriers = DATA.carriers.filter((c) => ITEMS.some((it) => it.c === c));
+  const cs = spread(carriers, n), ps = spread(PERIODS, n), ts = spread([0, 1, 2], n);
+  const planQ = new Map(), used = new Set(), out = [];
+  const nextPlans = (c) => { let q = planQ.get(c); if (!q || !q.length) { q = shuffle(c.plans); planQ.set(c, q); } return q; };
+  const free = (it) => it && !used.has(it.key);
+  for (let i = 0; i < n; i++) {
+    const c = cs[i], per = ps[i], t = ts[i];
+    let it = null;
+    const q = nextPlans(c);
+    for (let j = 0; j < q.length && !it; j++) {
+      const cand = BYKEY[`${c.id}|${q[j].name}|${per}|${t}`];
+      if (free(cand)) { it = cand; q.splice(j, 1); }
+    }
+    if (!it) it = shuffle(ITEMS.filter((x) => x.c === c && x.t === t && free(x)))[0];
+    if (!it) it = shuffle(ITEMS.filter((x) => x.c === c && free(x)))[0];
+    if (!it) it = shuffle(ITEMS.filter(free))[0];
+    if (!it) { used.clear(); it = shuffle(ITEMS)[0]; }
+    used.add(it.key); out.push(it);
+  }
+  return out;
+}
+
+function makeOptions(it) {
+  const ans = it.ans, seen = new Set([ans]), pick = [];
+  const add = (v) => { v = Number(v); if (!(v > 0) || seen.has(v)) return; seen.add(v); pick.push(v); };
+  const samePlan = [];
+  for (const per of PERIODS) { const r = it.p.rates[per]; if (r) r.forEach((v) => { if (v != null) samePlan.push(Number(v)); }); }
+  for (const v of shuffle(samePlan)) { if (pick.length >= 2) break; add(v); }
+  const sameSlot = it.c.plans.filter((p) => p !== it.p).map((p) => p.rates[it.per] && p.rates[it.per][it.t]).filter((v) => v != null);
+  for (const v of shuffle(sameSlot)) { if (pick.length >= 3) break; add(v); }
+  const step = ans >= 5000 ? 500 : ans >= 1000 ? 100 : 50;
+  for (const k of shuffle([1, -1, 2, -2, 3, -3, 4, -4, 5])) { if (pick.length >= 3) break; add(ans + k * step); }
+  return shuffle([ans, ...pick.slice(0, 3)]);
+}
+
+/* ---------- 作答 ---------- */
+function show(id) { ["#quiz", "#summary", "#history"].forEach((s) => $(s).classList.toggle("hidden", s !== id)); $("#nextDock").classList.add("hidden"); window.scrollTo(0, 0); }
+
+function startRound() {
+  session = { list: buildRound(ROUND), idx: 0, correct: 0, wrongs: [], cur: null, answered: false };
+  show("#quiz");
+  renderQuestion();
+}
+function renderQuestion() {
+  const s = session, it = s.list[s.idx];
+  s.cur = { it, opts: makeOptions(it) }; s.answered = false;
+  $("#qCount").textContent = `${s.idx + 1} / ${s.list.length}`;
+  $("#progBar").style.width = `${(s.idx / s.list.length) * 100}%`;
+  $("#qBody").innerHTML = `
+    <div class="qcard pop" style="--cc:${esc(it.c.color)}">
+      <div class="carrier">${esc(it.c.name)}</div>
+      <div class="qplan">${esc(it.p.name)}</div>
+      <div class="qtags"><span class="tag">${it.per} 期</span><span class="tag t${it.t}">${TYPES[it.t]}</span></div>
+      <div class="qask">佣金是多少？</div>
+    </div>
+    <div class="opts">${s.cur.opts.map((v, i) => `<button class="opt num" data-i="${i}">${v}</button>`).join("")}</div>
+    <div id="reveal"></div>`;
+  $("#nextDock").classList.add("hidden");
+  window.scrollTo(0, 0);
+}
+function rateTable(p, hl) {
+  let h = `<table class="rt num"><thead><tr><th>期數</th>${TYPES.map((t) => `<th>${t}</th>`).join("")}</tr></thead><tbody>`;
+  for (const per of PERIODS) {
+    const r = p.rates[per];
+    h += `<tr><td>${per} 期</td>`;
+    for (let t = 0; t < 3; t++) {
+      const v = r ? r[t] : null, isHl = hl && hl.per === per && hl.t === t;
+      h += v == null ? `<td class="na">—</td>` : `<td class="v${isHl ? " hl" : ""}">${v}</td>`;
+    }
+    h += `</tr>`;
+  }
+  return h + `</tbody></table>`;
+}
+
+$("#qBody").addEventListener("click", (e) => { const b = e.target.closest(".opt"); if (b && !session.answered) answer(Number(b.dataset.i)); });
+document.addEventListener("keydown", (e) => {
+  if ($("#quiz").classList.contains("hidden") || !session) return;
+  if (!session.answered && ["1", "2", "3", "4"].includes(e.key)) answer(Number(e.key) - 1);
+  else if (session.answered && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); goNext(); }
+});
+
+let autoTimer = null;
+function answer(i) {
+  const s = session, { it, opts } = s.cur;
+  s.answered = true;
+  const ok = opts[i] === it.ans;
+  if (ok) s.correct++; else s.wrongs.push(it);
+  document.querySelectorAll(".opt").forEach((el, j) => {
+    el.disabled = true;
+    if (opts[j] === it.ans) el.classList.add("ok"); else if (j === i) el.classList.add("ng"); else el.classList.add("dim");
+  });
+  $("#reveal").innerHTML = `
+    <div class="verdict ${ok ? "ok" : "ng"}">${ok ? "✓ 答對了！" : "✗ 答錯了"}　正確答案 <span class="num">${it.ans}</span></div>
+    <div class="card plan-card"><h3><span class="carrier" style="--cc:${esc(it.c.color)}">${esc(it.c.name)}</span> ${esc(it.p.name)}</h3>${rateTable(it.p, it)}</div>`;
+  $("#progBar").style.width = `${((s.idx + 1) / s.list.length) * 100}%`;
+  const last = s.idx + 1 >= s.list.length;
+  $("#nextBtn").textContent = last ? "看結果" : "下一題";
+  $("#nextDock").classList.remove("hidden");
+  clearTimeout(autoTimer);
+  if (ok) autoTimer = setTimeout(goNext, AUTO_NEXT_MS);
+}
+function goNext() {
+  clearTimeout(autoTimer);
+  if (!session || !session.answered) return;
+  session.idx++;
+  if (session.idx >= session.list.length) endRound(); else renderQuestion();
+}
+$("#nextBtn").addEventListener("click", goNext);
+
+/* ---------- 結算與紀錄 ---------- */
+function endRound() {
+  const s = session;
+  hist.push({ at: Date.now(), c: s.correct, n: s.list.length, w: s.wrongs.map((it) => it.key) });
+  LS.set("cq_hist", hist);
+  const pct = Math.round((s.correct / s.list.length) * 100);
+  $("#summaryBody").innerHTML = `
+    <div class="top"><div class="brand">本輪結果</div></div>
+    <div class="card pop"><div class="summary-score num"><b>${s.correct}<span style="font-size:24px"> / ${s.list.length}</span></b><div>正確率 ${pct}%</div></div></div>
+    <button class="btn" id="sAgain" style="margin-bottom:14px">再來一輪（20 題）</button>
+    ${s.wrongs.length ? `<div class="card"><p class="sec-title">這輪答錯（${s.wrongs.length}）</p>${s.wrongs.map(itemRow).join("")}</div>` : `<div class="card empty"><b>🎉</b>全部答對！</div>`}
+    <button class="btn ghost" id="sHist">查看過往紀錄</button>`;
+  show("#summary");
+  $("#sAgain").onclick = startRound;
+  $("#sHist").onclick = () => renderHistory("#summary");
+}
+function itemRow(it) {
+  return `<div class="list-item">
+    <div class="li-main"><div class="li-title"><span class="carrier" style="--cc:${esc(it.c.color)}">${esc(it.c.name)}</span> ${esc(it.p.name)}</div>
+    <div class="li-sub">${it.per} 期 · ${TYPES[it.t]}</div></div>
+    <div class="li-ans num">${it.ans}</div></div>`;
+}
+
+let returnTo = "#quiz";
+$("#histBtn").addEventListener("click", () => { clearTimeout(autoTimer); renderHistory("#quiz"); });
+function renderHistory(from) {
+  returnTo = from;
+  const rounds = hist.length;
+  const totC = hist.reduce((a, h) => a + h.c, 0), totN = hist.reduce((a, h) => a + h.n, 0);
+  const best = rounds ? Math.max(...hist.map((h) => Math.round((h.c / h.n) * 100))) : null;
+  const avg = totN ? Math.round((totC / totN) * 100) : null;
+  const rows = hist.slice().reverse().map((h) => {
+    const p = Math.round((h.c / h.n) * 100), cls = p >= 80 ? "hi" : p >= 60 ? "mid" : "lo";
+    const ws = h.w.map((k) => BYKEY[k]).filter(Boolean);
+    return `<details class="hist-item"><summary><span class="when num">${fmtTime(h.at)}</span><span class="sc num">${h.c}/${h.n}</span><span class="pct ${cls} num">${p}%</span></summary>
+      ${ws.length ? ws.map(itemRow).join("") : `<div class="li-sub">全部答對</div>`}</details>`;
+  }).join("");
+  $("#historyBody").innerHTML = `
+    <button class="back" id="hBack">‹ ${from === "#quiz" ? "繼續作答" : "返回"}</button>
+    <div class="top"><div class="brand">過往紀錄<small>點任一輪可看當輪答錯的題目</small></div>${DATA.note ? `<span class="pill warn">測試資料</span>` : ""}</div>
+    <div class="card"><div class="big-stat num">
+      <div><b>${rounds}</b><span>完成輪數</span></div>
+      <div><b>${avg == null ? "—" : avg + "%"}</b><span>平均正確率</span></div>
+      <div><b>${best == null ? "—" : best + "%"}</b><span>最佳成績</span></div>
+    </div></div>
+    <div class="card">${rows || `<div class="empty"><b>📝</b>還沒有紀錄<br>完成一輪 20 題後會出現在這裡</div>`}</div>
+    <p class="hint">紀錄保存在這台裝置的瀏覽器中。資料更新日期：${esc(DATA.updated || "—")}</p>
+    <button class="btn danger" id="hLock" style="margin-top:14px">鎖定（下次需重新輸入密碼）</button>`;
+  show("#history");
+  $("#hBack").onclick = () => {
+    show(returnTo);
+    if (returnTo === "#quiz" && session && session.answered) $("#nextDock").classList.remove("hidden");
+  };
+  $("#hLock").onclick = () => { LS.del("cq_pw"); location.reload(); };
+}
+
+boot();
+})();
+</script>
+</body>
+</html>
