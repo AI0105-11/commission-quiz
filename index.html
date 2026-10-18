@@ -206,6 +206,21 @@ details.plans summary::-webkit-details-marker{display:none}
 .pct.lo{background:var(--bad-soft);color:var(--bad)}
 .hist-item .li-sub{margin-top:8px}
 .back{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--accent);min-height:40px}
+.mode-seg{margin:-4px 0 12px}
+.mode-seg button{min-height:32px;font-size:13px}
+.tag.retry{font-size:12px;padding:3px 10px;background:#fff1cc;color:#7a5a00}
+.trap{background:#fff4e0;border:1px solid #f0c98a;color:#7a4b00;border-radius:12px;padding:10px 14px;margin:0 0 12px;font-size:14px}
+.trap b{display:block;margin-bottom:2px}
+.rt td.tp{position:relative}
+.rt td.tp::after{content:"";position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:#e08a00}
+.ans-form{display:flex;gap:10px}
+.ans-in{flex:1;margin:0;font-size:26px;font-weight:800;text-align:center;min-height:64px}
+.ans-form .btn{width:96px;min-height:64px}
+.ans-in.ok{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.ans-in.ng{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.trap-mini,.mode-mini{font-size:11px;padding:1px 6px;border-radius:6px;background:#fff1cc;color:#7a5a00;font-weight:700;vertical-align:2px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .trap{background:#33270f;border-color:#6b5020;color:#f3cf86}
+ :root:not([data-theme="light"]) .tag.retry,:root:not([data-theme="light"]) .trap-mini,:root:not([data-theme="light"]) .mode-mini{background:#3a3110;color:#f3d77a}}
 </style>
 </head>
 <body>
@@ -231,6 +246,7 @@ details.plans summary::-webkit-details-marker{display:none}
       <div class="prog"><i id="progBar"></i></div>
       <div class="qcount num" id="qCount"></div>
     </div>
+    <div class="seg mode-seg" id="modeSeg"></div>
     <div id="qBody"></div>
   </div>
   <div class="next-dock hidden" id="nextDock"><button class="btn" id="nextBtn">下一題</button></div>
@@ -303,17 +319,94 @@ $("#lockForm").addEventListener("submit", async (e) => {
 });
 
 /* ---------- 資料整理 ---------- */
+const RETRY_MAX = 2;          // 同一題在同一輪最多重考次數
+const TRAP_P = 0.5;           // 有陷阱格可抽時，優先抽陷阱格的機率
+let mode = LS.get("cq_mode", "choice");   // choice：四選一｜input：輸入數字
+
 function buildItems() {
   ITEMS = []; BYKEY = {};
   for (const c of DATA.carriers) for (const p of c.plans) for (const per of PERIODS) {
     const r = p.rates[per]; if (!r) continue;
     r.forEach((v, t) => {
       if (v === null || v === undefined || v === "") return;
-      const it = { key: `${c.id}|${p.name}|${per}|${t}`, c, p, per, t, ans: Number(v) };
+      const it = { key: `${c.id}|${p.name}|${per}|${t}`, c, p, per, t, ans: Number(v), trap: [] };
       ITEMS.push(it); BYKEY[it.key] = it;
     });
   }
+  detectTraps();
 }
+const keyOf = (c, p, per, t) => `${c.id}|${p.name}|${per}|${t}`;
+const sgn = (x) => (x > 0 ? 1 : x < 0 ? -1 : 0);
+
+/* ---------- 陷阱格偵測 ----------
+   先從資料統計「多數規律」，再把不符合規律或數字相同（容易搞混）的格子標成陷阱格：
+   1. 同期數內三種類型的大小順序（例如通常 攜碼 > 新辦 > 續約）
+   2. 同類型時，期數越長佣金的增減方向
+   3. 同電信同格位時，資費越高佣金的增減方向 */
+function detectTraps() {
+  const flag = (c, p, per, t, msg) => { const it = BYKEY[keyOf(c, p, per, t)]; if (it && !it.trap.includes(msg)) it.trap.push(msg); };
+  const pairs = [[0, 1], [1, 2], [0, 2]];
+  // 1. 類型順序
+  const tdir = {};
+  for (const [a, b] of pairs) {
+    let s = 0;
+    for (const c of DATA.carriers) for (const p of c.plans) for (const per of PERIODS) {
+      const r = p.rates[per]; if (r && r[a] != null && r[b] != null) s += sgn(r[a] - r[b]);
+    }
+    tdir[a + "" + b] = sgn(s);
+  }
+  // 2. 期數方向
+  let ps = 0;
+  const periodPairs = (p, t) => {
+    const out = []; let prev = null;
+    for (const per of PERIODS) { const r = p.rates[per]; if (!r || r[t] == null) continue; if (prev) out.push([prev, per]); prev = per; }
+    return out;
+  };
+  for (const c of DATA.carriers) for (const p of c.plans) for (let t = 0; t < 3; t++)
+    for (const [p1, p2] of periodPairs(p, t)) ps += sgn(p.rates[p2][t] - p.rates[p1][t]);
+  const pdir = sgn(ps);
+  // 3. 資費方向
+  const price = (p) => { const m = String(p.name).match(/(\d{3,5})(?!.*\d{3,5})/); return m ? Number(m[1]) : null; };
+  const sortedPlans = (c) => c.plans.filter((p) => price(p) != null).sort((x, y) => price(x) - price(y));
+  let fs = 0;
+  for (const c of DATA.carriers) { const sp = sortedPlans(c);
+    for (let i = 1; i < sp.length; i++) for (const per of PERIODS) for (let t = 0; t < 3; t++) {
+      const a = sp[i - 1].rates[per], b = sp[i].rates[per];
+      if (a && b && a[t] != null && b[t] != null && price(sp[i]) !== price(sp[i - 1])) fs += sgn(b[t] - a[t]);
+    } }
+  const fdir = sgn(fs);
+
+  for (const c of DATA.carriers) {
+    for (const p of c.plans) for (const per of PERIODS) {
+      const r = p.rates[per]; if (!r) continue;
+      for (const [a, b] of pairs) {
+        const x = r[a], y = r[b], d = tdir[a + "" + b];
+        if (x == null || y == null) continue;
+        if (x === y) { const m = `${per} 期的${TYPES[a]}和${TYPES[b]}一樣都是 ${x}`; flag(c, p, per, a, m); flag(c, p, per, b, m); }
+        else if (d && sgn(x - y) === -d) {
+          const [hi, lo, vh, vl] = x > y ? [a, b, x, y] : [b, a, y, x];
+          const m = `${per} 期的${TYPES[hi]} ${vh} 反而比${TYPES[lo]} ${vl} 高`;
+          flag(c, p, per, a, m); flag(c, p, per, b, m);
+        }
+      }
+    }
+    for (const p of c.plans) for (let t = 0; t < 3; t++) for (const [p1, p2] of periodPairs(p, t)) {
+      const v1 = p.rates[p1][t], v2 = p.rates[p2][t];
+      if (v1 === v2) { const m = `${TYPES[t]}的 ${p1} 期和 ${p2} 期一樣都是 ${v1}`; flag(c, p, p1, t, m); flag(c, p, p2, t, m); }
+      else if (pdir && sgn(v2 - v1) === -pdir) { const m = `${TYPES[t]}的 ${p2} 期 ${v2} 反而比 ${p1} 期 ${v1} ${v2 < v1 ? "低" : "高"}`; flag(c, p, p1, t, m); flag(c, p, p2, t, m); }
+    }
+    const sp = sortedPlans(c);
+    if (fdir) for (let i = 1; i < sp.length; i++) for (const per of PERIODS) for (let t = 0; t < 3; t++) {
+      const lo = sp[i - 1], hi = sp[i], a = lo.rates[per], b = hi.rates[per];
+      if (!a || !b || a[t] == null || b[t] == null || price(lo) === price(hi)) continue;
+      if (sgn(b[t] - a[t]) === -fdir) {
+        flag(c, lo, per, t, `比更高資費的 ${hi.name}（${b[t]}）還${a[t] > b[t] ? "高" : "低"}`);
+        flag(c, hi, per, t, `比較低資費的 ${lo.name}（${a[t]}）還${b[t] < a[t] ? "低" : "高"}`);
+      }
+    }
+  }
+}
+
 function start() {
   buildItems();
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
@@ -321,8 +414,8 @@ function start() {
 }
 
 /* ---------- 平均抽題 ----------
-   20 題中：三家電信各約 7 題、四種期數各 5 題、三種類型各約 7 題，
-   同一家電信內的方案輪流出現，順序完全隨機。不參考過往紀錄。 */
+   20 題中：三家電信各約 7 題、四種期數各 5 題、三種類型各約 7 題，順序隨機，不參考過往紀錄。
+   同一格位有陷阱格時，有一半機率優先抽陷阱格；其餘依方案輪流。 */
 function spread(list, n) { let out = []; while (out.length < n) out = out.concat(shuffle(list)); return shuffle(out.slice(0, n)); }
 function buildRound(n) {
   const carriers = DATA.carriers.filter((c) => ITEMS.some((it) => it.c === c));
@@ -334,8 +427,13 @@ function buildRound(n) {
     const c = cs[i], per = ps[i], t = ts[i];
     let it = null;
     const q = nextPlans(c);
+    const traps = c.plans.map((p) => BYKEY[keyOf(c, p, per, t)]).filter((x) => free(x) && x.trap.length);
+    if (traps.length && Math.random() < TRAP_P) {
+      it = shuffle(traps)[0];
+      const j = q.indexOf(it.p); if (j >= 0) q.splice(j, 1);
+    }
     for (let j = 0; j < q.length && !it; j++) {
-      const cand = BYKEY[`${c.id}|${q[j].name}|${per}|${t}`];
+      const cand = BYKEY[keyOf(c, q[j], per, t)];
       if (free(cand)) { it = cand; q.splice(j, 1); }
     }
     if (!it) it = shuffle(ITEMS.filter((x) => x.c === c && x.t === t && free(x)))[0];
@@ -364,26 +462,55 @@ function makeOptions(it) {
 function show(id) { ["#quiz", "#summary", "#history"].forEach((s) => $(s).classList.toggle("hidden", s !== id)); $("#nextDock").classList.add("hidden"); window.scrollTo(0, 0); }
 
 function startRound() {
-  session = { list: buildRound(ROUND), idx: 0, correct: 0, wrongs: [], cur: null, answered: false };
+  // list 內每一題：{it, retry:是否為重考}
+  session = { list: buildRound(ROUND).map((it) => ({ it, retry: false })), idx: 0, firstOk: 0, firstWrong: [], retryAsk: 0, retryOk: 0, retryCount: {}, cur: null, answered: false, mode };
   show("#quiz");
   renderQuestion();
 }
-function renderQuestion() {
-  const s = session, it = s.list[s.idx];
-  s.cur = { it, opts: makeOptions(it) }; s.answered = false;
-  $("#qCount").textContent = `${s.idx + 1} / ${s.list.length}`;
+function origDone() { return session.list.slice(0, session.idx).filter((q) => !q.retry).length; }
+
+function renderModeSeg() {
+  $("#modeSeg").innerHTML = `<button data-m="choice" aria-pressed="${mode === "choice"}">四選一</button><button data-m="input" aria-pressed="${mode === "input"}">輸入數字</button>`;
+}
+$("#modeSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b || b.dataset.m === mode) return;
+  mode = b.dataset.m; LS.set("cq_mode", mode); renderModeSeg();
+  if (session && !session.answered) renderQuestion(true);
+});
+
+function renderQuestion(keep) {
+  const s = session, q = s.list[s.idx], it = q.it;
+  if (!keep || !s.cur || s.cur.it !== it) s.cur = { it, opts: makeOptions(it), retry: q.retry };
+  s.answered = false;
+  renderModeSeg();
+  const od = origDone();
+  const extra = s.list.length - ROUND;
+  $("#qCount").textContent = q.retry ? `重考中 · ${od} / ${ROUND}` : `${od + 1} / ${ROUND}${extra ? ` · 重考 ${extra}` : ""}`;
   $("#progBar").style.width = `${(s.idx / s.list.length) * 100}%`;
+  const answerArea = mode === "choice"
+    ? `<div class="opts">${s.cur.opts.map((v, i) => `<button class="opt num" data-i="${i}">${v}</button>`).join("")}</div>`
+    : `<form class="ans-form" id="ansForm" autocomplete="off"><input id="ansIn" class="field num ans-in" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="輸入佣金" enterkeyhint="done"><button class="btn" type="submit">確定</button></form>`;
   $("#qBody").innerHTML = `
     <div class="qcard pop" style="--cc:${esc(it.c.color)}">
-      <div class="carrier">${esc(it.c.name)}</div>
+      <div class="row-between"><div class="carrier">${esc(it.c.name)}</div>${q.retry ? `<span class="tag retry">重考</span>` : ""}</div>
       <div class="qplan">${esc(it.p.name)}</div>
       <div class="qtags"><span class="tag">${it.per} 期</span><span class="tag t${it.t}">${TYPES[it.t]}</span></div>
       <div class="qask">佣金是多少？</div>
     </div>
-    <div class="opts">${s.cur.opts.map((v, i) => `<button class="opt num" data-i="${i}">${v}</button>`).join("")}</div>
+    ${answerArea}
     <div id="reveal"></div>`;
   $("#nextDock").classList.add("hidden");
   window.scrollTo(0, 0);
+  if (mode === "input") {
+    const inp = $("#ansIn");
+    setTimeout(() => inp.focus(), 30);
+    $("#ansForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const v = inp.value.replace(/\D/g, "");
+      if (!v || session.answered) return;
+      answer(Number(v));
+    });
+  }
 }
 function rateTable(p, hl) {
   let h = `<table class="rt num"><thead><tr><th>期數</th>${TYPES.map((t) => `<th>${t}</th>`).join("")}</tr></thead><tbody>`;
@@ -392,32 +519,60 @@ function rateTable(p, hl) {
     h += `<tr><td>${per} 期</td>`;
     for (let t = 0; t < 3; t++) {
       const v = r ? r[t] : null, isHl = hl && hl.per === per && hl.t === t;
-      h += v == null ? `<td class="na">—</td>` : `<td class="v${isHl ? " hl" : ""}">${v}</td>`;
+      const it = v == null ? null : BYKEY[`${hl ? hl.c.id : ""}|${p.name}|${per}|${t}`];
+      const tp = it && it.trap.length ? " tp" : "";
+      h += v == null ? `<td class="na">—</td>` : `<td class="v${isHl ? " hl" : ""}${tp}">${v}</td>`;
     }
     h += `</tr>`;
   }
   return h + `</tbody></table>`;
 }
 
-$("#qBody").addEventListener("click", (e) => { const b = e.target.closest(".opt"); if (b && !session.answered) answer(Number(b.dataset.i)); });
+$("#qBody").addEventListener("click", (e) => {
+  const b = e.target.closest(".opt"); if (!b || session.answered) return;
+  answer(session.cur.opts[Number(b.dataset.i)], Number(b.dataset.i));
+});
 document.addEventListener("keydown", (e) => {
   if ($("#quiz").classList.contains("hidden") || !session) return;
-  if (!session.answered && ["1", "2", "3", "4"].includes(e.key)) answer(Number(e.key) - 1);
+  if (!session.answered && mode === "choice" && ["1", "2", "3", "4"].includes(e.key)) { const i = Number(e.key) - 1; answer(session.cur.opts[i], i); }
   else if (session.answered && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); goNext(); }
 });
 
 let autoTimer = null;
-function answer(i) {
-  const s = session, { it, opts } = s.cur;
+function answer(value, chosenIdx) {
+  const s = session, { it, opts } = s.cur, q = s.list[s.idx];
   s.answered = true;
-  const ok = opts[i] === it.ans;
-  if (ok) s.correct++; else s.wrongs.push(it);
-  document.querySelectorAll(".opt").forEach((el, j) => {
-    el.disabled = true;
-    if (opts[j] === it.ans) el.classList.add("ok"); else if (j === i) el.classList.add("ng"); else el.classList.add("dim");
-  });
+  const ok = Number(value) === it.ans;
+  if (q.retry) { s.retryAsk++; if (ok) s.retryOk++; }
+  else { if (ok) s.firstOk++; else s.firstWrong.push(it); }
+  // 答錯：3 到 5 題後再考一次
+  let requeued = false;
+  if (!ok) {
+    const n = s.retryCount[it.key] || 0;
+    if (n < RETRY_MAX) {
+      s.retryCount[it.key] = n + 1;
+      const pos = Math.min(s.idx + 3 + Math.floor(Math.random() * 3), s.list.length);
+      s.list.splice(pos, 0, { it, retry: true });
+      requeued = true;
+    }
+  }
+  if (mode === "choice" && chosenIdx !== undefined) {
+    document.querySelectorAll(".opt").forEach((el, j) => {
+      el.disabled = true;
+      if (opts[j] === it.ans) el.classList.add("ok"); else if (j === chosenIdx) el.classList.add("ng"); else el.classList.add("dim");
+    });
+  } else {
+    const inp = $("#ansIn"); if (inp) { inp.disabled = true; inp.classList.add(ok ? "ok" : "ng"); }
+    const btn = document.querySelector("#ansForm .btn"); if (btn) btn.classList.add("hidden");
+    if (document.activeElement) document.activeElement.blur();
+  }
+  const verdict = ok
+    ? `<div class="verdict ok">✓ 答對了！　正確答案 <span class="num">${it.ans}</span></div>`
+    : `<div class="verdict ng">✗ ${mode === "input" ? `你填 <span class="num">${value}</span>　` : ""}正確答案 <span class="num">${it.ans}</span></div>`;
   $("#reveal").innerHTML = `
-    <div class="verdict ${ok ? "ok" : "ng"}">${ok ? "✓ 答對了！" : "✗ 答錯了"}　正確答案 <span class="num">${it.ans}</span></div>
+    ${verdict}
+    ${it.trap.length ? `<div class="trap"><b>⚠ 陷阱格</b>${it.trap.map((m) => `<div>${esc(m)}</div>`).join("")}</div>` : ""}
+    ${requeued ? `<div class="hint" style="text-align:left;margin:0 2px 10px">這題稍後會再考一次</div>` : ""}
     <div class="card plan-card"><h3><span class="carrier" style="--cc:${esc(it.c.color)}">${esc(it.c.name)}</span> ${esc(it.p.name)}</h3>${rateTable(it.p, it)}</div>`;
   $("#progBar").style.width = `${((s.idx + 1) / s.list.length) * 100}%`;
   const last = s.idx + 1 >= s.list.length;
@@ -437,14 +592,15 @@ $("#nextBtn").addEventListener("click", goNext);
 /* ---------- 結算與紀錄 ---------- */
 function endRound() {
   const s = session;
-  hist.push({ at: Date.now(), c: s.correct, n: s.list.length, w: s.wrongs.map((it) => it.key) });
+  hist.push({ at: Date.now(), c: s.firstOk, n: ROUND, w: s.firstWrong.map((it) => it.key), m: s.mode === "input" ? "i" : "c", r: [s.retryOk, s.retryAsk] });
   LS.set("cq_hist", hist);
-  const pct = Math.round((s.correct / s.list.length) * 100);
+  const pct = Math.round((s.firstOk / ROUND) * 100);
   $("#summaryBody").innerHTML = `
-    <div class="top"><div class="brand">本輪結果</div></div>
-    <div class="card pop"><div class="summary-score num"><b>${s.correct}<span style="font-size:24px"> / ${s.list.length}</span></b><div>正確率 ${pct}%</div></div></div>
+    <div class="top"><div class="brand">本輪結果</div><span class="pill">${s.mode === "input" ? "輸入數字" : "四選一"}</span></div>
+    <div class="card pop"><div class="summary-score num"><b>${s.firstOk}<span style="font-size:24px"> / ${ROUND}</span></b><div>首次作答正確率 ${pct}%</div>
+      ${s.retryAsk ? `<div style="margin-top:6px">重考 ${s.retryAsk} 題，答對 ${s.retryOk} 題</div>` : ""}</div></div>
     <button class="btn" id="sAgain" style="margin-bottom:14px">再來一輪（20 題）</button>
-    ${s.wrongs.length ? `<div class="card"><p class="sec-title">這輪答錯（${s.wrongs.length}）</p>${s.wrongs.map(itemRow).join("")}</div>` : `<div class="card empty"><b>🎉</b>全部答對！</div>`}
+    ${s.firstWrong.length ? `<div class="card"><p class="sec-title">這輪答錯（${s.firstWrong.length}）</p>${s.firstWrong.map(itemRow).join("")}</div>` : `<div class="card empty"><b>🎉</b>全部答對！</div>`}
     <button class="btn ghost" id="sHist">查看過往紀錄</button>`;
   show("#summary");
   $("#sAgain").onclick = startRound;
@@ -452,7 +608,7 @@ function endRound() {
 }
 function itemRow(it) {
   return `<div class="list-item">
-    <div class="li-main"><div class="li-title"><span class="carrier" style="--cc:${esc(it.c.color)}">${esc(it.c.name)}</span> ${esc(it.p.name)}</div>
+    <div class="li-main"><div class="li-title"><span class="carrier" style="--cc:${esc(it.c.color)}">${esc(it.c.name)}</span> ${esc(it.p.name)}${it.trap.length ? ` <span class="trap-mini">陷阱</span>` : ""}</div>
     <div class="li-sub">${it.per} 期 · ${TYPES[it.t]}</div></div>
     <div class="li-ans num">${it.ans}</div></div>`;
 }
@@ -465,10 +621,11 @@ function renderHistory(from) {
   const totC = hist.reduce((a, h) => a + h.c, 0), totN = hist.reduce((a, h) => a + h.n, 0);
   const best = rounds ? Math.max(...hist.map((h) => Math.round((h.c / h.n) * 100))) : null;
   const avg = totN ? Math.round((totC / totN) * 100) : null;
+  const trapN = ITEMS.filter((it) => it.trap.length).length;
   const rows = hist.slice().reverse().map((h) => {
     const p = Math.round((h.c / h.n) * 100), cls = p >= 80 ? "hi" : p >= 60 ? "mid" : "lo";
     const ws = h.w.map((k) => BYKEY[k]).filter(Boolean);
-    return `<details class="hist-item"><summary><span class="when num">${fmtTime(h.at)}</span><span class="sc num">${h.c}/${h.n}</span><span class="pct ${cls} num">${p}%</span></summary>
+    return `<details class="hist-item"><summary><span class="when num">${fmtTime(h.at)}${h.m === "i" ? ` <span class="mode-mini">輸入</span>` : ""}</span><span class="sc num">${h.c}/${h.n}</span><span class="pct ${cls} num">${p}%</span></summary>
       ${ws.length ? ws.map(itemRow).join("") : `<div class="li-sub">全部答對</div>`}</details>`;
   }).join("");
   $("#historyBody").innerHTML = `
@@ -480,7 +637,7 @@ function renderHistory(from) {
       <div><b>${best == null ? "—" : best + "%"}</b><span>最佳成績</span></div>
     </div></div>
     <div class="card">${rows || `<div class="empty"><b>📝</b>還沒有紀錄<br>完成一輪 20 題後會出現在這裡</div>`}</div>
-    <p class="hint">紀錄保存在這台裝置的瀏覽器中。資料更新日期：${esc(DATA.updated || "—")}</p>
+    <p class="hint">成績以每輪 20 題的首次作答計算，重考不計分。<br>題庫共 ${ITEMS.length} 格，其中陷阱格 ${trapN} 格。<br>紀錄保存在這台裝置的瀏覽器中。資料更新日期：${esc(DATA.updated || "—")}</p>
     <button class="btn danger" id="hLock" style="margin-top:14px">鎖定（下次需重新輸入密碼）</button>`;
   show("#history");
   $("#hBack").onclick = () => {
