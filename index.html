@@ -206,6 +206,10 @@ details.plans summary::-webkit-details-marker{display:none}
 .pct.lo{background:var(--bad-soft);color:var(--bad)}
 .hist-item .li-sub{margin-top:8px}
 .back{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--accent);min-height:40px}
+.restart{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 12px;border-radius:12px;background:var(--surface2);font-size:14px;font-weight:700;color:var(--muted);flex:none;white-space:nowrap}
+.restart.armed{background:var(--bad-soft);color:var(--bad)}
+.big-stat span{white-space:nowrap}
+@media (max-width:360px){.big-stat{gap:6px}.big-stat div{padding:10px 4px}.big-stat b{font-size:22px}.qcount{font-size:13px}}
 .mode-seg{margin:-4px 0 12px}
 .mode-seg button{min-height:32px;font-size:13px}
 .tag.retry{font-size:12px;padding:3px 10px;background:#fff1cc;color:#7a5a00}
@@ -245,6 +249,7 @@ details.plans summary::-webkit-details-marker{display:none}
       <button class="x" id="histBtn" aria-label="過往紀錄"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
       <div class="prog"><i id="progBar"></i></div>
       <div class="qcount num" id="qCount"></div>
+      <button class="restart" id="restartBtn" aria-label="重新開始"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span id="restartTxt">重來</span></button>
     </div>
     <div class="seg mode-seg" id="modeSeg"></div>
     <div id="qBody"></div>
@@ -462,12 +467,23 @@ function makeOptions(it) {
 function show(id) { ["#quiz", "#summary", "#history"].forEach((s) => $(s).classList.toggle("hidden", s !== id)); $("#nextDock").classList.add("hidden"); window.scrollTo(0, 0); }
 
 function startRound() {
-  // list 內每一題：{it, retry:是否為重考}
-  session = { list: buildRound(ROUND).map((it) => ({ it, retry: false })), idx: 0, firstOk: 0, firstWrong: [], retryAsk: 0, retryOk: 0, retryCount: {}, cur: null, answered: false, mode };
+  if (restartArm) disarmRestart();
+  // orig：本輪 20 題；pending：待重考 {it, due}；step：已作答題數
+  session = { orig: buildRound(ROUND), oi: 0, pending: [], step: 0, q: null, firstOk: 0, firstWrong: [], retryAsk: 0, retryOk: 0, retryCount: {}, cur: null, answered: false, modes: new Set() };
   show("#quiz");
   renderQuestion();
 }
-function origDone() { return session.list.slice(0, session.idx).filter((q) => !q.retry).length; }
+// 下一題：到期的重考題優先，其次是原本 20 題，最後補完還沒考的重考題
+function nextQ() {
+  const s = session;
+  const due = s.pending.filter((x) => x.due <= s.step).sort((x, y) => x.due - y.due)[0];
+  if (due) { s.pending.splice(s.pending.indexOf(due), 1); return { it: due.it, retry: true }; }
+  if (s.oi < s.orig.length) return { it: s.orig[s.oi++], retry: false };
+  if (s.pending.length) { s.pending.sort((x, y) => x.due - y.due); return { it: s.pending.shift().it, retry: true }; }
+  return null;
+}
+const progress = (extra) => { const s = session, left = (s.orig.length - s.oi) + s.pending.length + 1; return ((s.step + extra) / (s.step + left)) * 100; };
+const roundDone = () => session.oi >= session.orig.length && !session.pending.length;
 
 function renderModeSeg() {
   $("#modeSeg").innerHTML = `<button data-m="choice" aria-pressed="${mode === "choice"}">四選一</button><button data-m="input" aria-pressed="${mode === "input"}">輸入數字</button>`;
@@ -479,14 +495,14 @@ $("#modeSeg").addEventListener("click", (e) => {
 });
 
 function renderQuestion(keep) {
-  const s = session, q = s.list[s.idx], it = q.it;
-  if (!keep || !s.cur || s.cur.it !== it) s.cur = { it, opts: makeOptions(it), retry: q.retry };
+  const s = session;
+  if (!keep || !s.q) { s.q = nextQ(); s.cur = { it: s.q.it, opts: makeOptions(s.q.it) }; }
+  const q = s.q, it = q.it;
   s.answered = false;
   renderModeSeg();
-  const od = origDone();
-  const extra = s.list.length - ROUND;
-  $("#qCount").textContent = q.retry ? `重考中 · ${od} / ${ROUND}` : `${od + 1} / ${ROUND}${extra ? ` · 重考 ${extra}` : ""}`;
-  $("#progBar").style.width = `${(s.idx / s.list.length) * 100}%`;
+  const wait = s.pending.length;
+  $("#qCount").textContent = q.retry ? `重考中 · ${s.oi} / ${ROUND}` : `${s.oi} / ${ROUND}${wait ? ` · 待重考 ${wait}` : ""}`;
+  $("#progBar").style.width = `${progress(0)}%`;
   const answerArea = mode === "choice"
     ? `<div class="opts">${s.cur.opts.map((v, i) => `<button class="opt num" data-i="${i}">${v}</button>`).join("")}</div>`
     : `<form class="ans-form" id="ansForm" autocomplete="off"><input id="ansIn" class="field num ans-in" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="輸入佣金" enterkeyhint="done"><button class="btn" type="submit">確定</button></form>`;
@@ -540,8 +556,9 @@ document.addEventListener("keydown", (e) => {
 
 let autoTimer = null;
 function answer(value, chosenIdx) {
-  const s = session, { it, opts } = s.cur, q = s.list[s.idx];
+  const s = session, { it, opts } = s.cur, q = s.q;
   s.answered = true;
+  s.modes.add(mode);
   const ok = Number(value) === it.ans;
   if (q.retry) { s.retryAsk++; if (ok) s.retryOk++; }
   else { if (ok) s.firstOk++; else s.firstWrong.push(it); }
@@ -551,8 +568,7 @@ function answer(value, chosenIdx) {
     const n = s.retryCount[it.key] || 0;
     if (n < RETRY_MAX) {
       s.retryCount[it.key] = n + 1;
-      const pos = Math.min(s.idx + 3 + Math.floor(Math.random() * 3), s.list.length);
-      s.list.splice(pos, 0, { it, retry: true });
+      s.pending.push({ it, due: s.step + 1 + 3 + Math.floor(Math.random() * 3) });
       requeued = true;
     }
   }
@@ -574,8 +590,8 @@ function answer(value, chosenIdx) {
     ${it.trap.length ? `<div class="trap"><b>⚠ 陷阱格</b>${it.trap.map((m) => `<div>${esc(m)}</div>`).join("")}</div>` : ""}
     ${requeued ? `<div class="hint" style="text-align:left;margin:0 2px 10px">這題稍後會再考一次</div>` : ""}
     <div class="card plan-card"><h3><span class="carrier" style="--cc:${esc(it.c.color)}">${esc(it.c.name)}</span> ${esc(it.p.name)}</h3>${rateTable(it.p, it)}</div>`;
-  $("#progBar").style.width = `${((s.idx + 1) / s.list.length) * 100}%`;
-  const last = s.idx + 1 >= s.list.length;
+  $("#progBar").style.width = `${progress(1)}%`;
+  const last = roundDone();
   $("#nextBtn").textContent = last ? "看結果" : "下一題";
   $("#nextDock").classList.remove("hidden");
   clearTimeout(autoTimer);
@@ -584,19 +600,19 @@ function answer(value, chosenIdx) {
 function goNext() {
   clearTimeout(autoTimer);
   if (!session || !session.answered) return;
-  session.idx++;
-  if (session.idx >= session.list.length) endRound(); else renderQuestion();
+  session.step++;
+  if (roundDone()) endRound(); else renderQuestion();
 }
 $("#nextBtn").addEventListener("click", goNext);
 
 /* ---------- 結算與紀錄 ---------- */
 function endRound() {
   const s = session;
-  hist.push({ at: Date.now(), c: s.firstOk, n: ROUND, w: s.firstWrong.map((it) => it.key), m: s.mode === "input" ? "i" : "c", r: [s.retryOk, s.retryAsk] });
+  hist.push({ at: Date.now(), c: s.firstOk, n: ROUND, w: s.firstWrong.map((it) => it.key), m: s.modes.size > 1 ? "x" : s.modes.has("input") ? "i" : "c", r: [s.retryOk, s.retryAsk] });
   LS.set("cq_hist", hist);
   const pct = Math.round((s.firstOk / ROUND) * 100);
   $("#summaryBody").innerHTML = `
-    <div class="top"><div class="brand">本輪結果</div><span class="pill">${s.mode === "input" ? "輸入數字" : "四選一"}</span></div>
+    <div class="top"><div class="brand">本輪結果</div><span class="pill">${s.modes.size > 1 ? "混合模式" : s.modes.has("input") ? "輸入數字" : "四選一"}</span></div>
     <div class="card pop"><div class="summary-score num"><b>${s.firstOk}<span style="font-size:24px"> / ${ROUND}</span></b><div>首次作答正確率 ${pct}%</div>
       ${s.retryAsk ? `<div style="margin-top:6px">重考 ${s.retryAsk} 題，答對 ${s.retryOk} 題</div>` : ""}</div></div>
     <button class="btn" id="sAgain" style="margin-bottom:14px">再來一輪（20 題）</button>
@@ -613,6 +629,18 @@ function itemRow(it) {
     <div class="li-ans num">${it.ans}</div></div>`;
 }
 
+/* 重來：按一下變成「確定？」，3 秒內再按一次就重新開始（未完成的這輪不記錄） */
+let restartArm = null;
+function disarmRestart() { clearTimeout(restartArm); restartArm = null; $("#restartBtn").classList.remove("armed"); $("#restartTxt").textContent = "重來"; }
+$("#restartBtn").addEventListener("click", () => {
+  if (!restartArm) {
+    $("#restartBtn").classList.add("armed"); $("#restartTxt").textContent = "確定？";
+    restartArm = setTimeout(disarmRestart, 3000);
+    return;
+  }
+  disarmRestart(); clearTimeout(autoTimer); startRound();
+});
+
 let returnTo = "#quiz";
 $("#histBtn").addEventListener("click", () => { clearTimeout(autoTimer); renderHistory("#quiz"); });
 function renderHistory(from) {
@@ -625,7 +653,7 @@ function renderHistory(from) {
   const rows = hist.slice().reverse().map((h) => {
     const p = Math.round((h.c / h.n) * 100), cls = p >= 80 ? "hi" : p >= 60 ? "mid" : "lo";
     const ws = h.w.map((k) => BYKEY[k]).filter(Boolean);
-    return `<details class="hist-item"><summary><span class="when num">${fmtTime(h.at)}${h.m === "i" ? ` <span class="mode-mini">輸入</span>` : ""}</span><span class="sc num">${h.c}/${h.n}</span><span class="pct ${cls} num">${p}%</span></summary>
+    return `<details class="hist-item"><summary><span class="when num">${fmtTime(h.at)}${h.m === "i" ? ` <span class="mode-mini">輸入</span>` : h.m === "x" ? ` <span class="mode-mini">混合</span>` : ""}</span><span class="sc num">${h.c}/${h.n}</span><span class="pct ${cls} num">${p}%</span></summary>
       ${ws.length ? ws.map(itemRow).join("") : `<div class="li-sub">全部答對</div>`}</details>`;
   }).join("");
   $("#historyBody").innerHTML = `
@@ -638,12 +666,14 @@ function renderHistory(from) {
     </div></div>
     <div class="card">${rows || `<div class="empty"><b>📝</b>還沒有紀錄<br>完成一輪 20 題後會出現在這裡</div>`}</div>
     <p class="hint">成績以每輪 20 題的首次作答計算，重考不計分。<br>題庫共 ${ITEMS.length} 格，其中陷阱格 ${trapN} 格。<br>紀錄保存在這台裝置的瀏覽器中。資料更新日期：${esc(DATA.updated || "—")}</p>
-    <button class="btn danger" id="hLock" style="margin-top:14px">鎖定（下次需重新輸入密碼）</button>`;
+    <button class="btn" id="hRestart" style="margin-top:14px">重新開始一輪</button>
+    <button class="btn danger" id="hLock" style="margin-top:10px">鎖定（下次需重新輸入密碼）</button>`;
   show("#history");
   $("#hBack").onclick = () => {
     show(returnTo);
     if (returnTo === "#quiz" && session && session.answered) $("#nextDock").classList.remove("hidden");
   };
+  $("#hRestart").onclick = () => { clearTimeout(autoTimer); startRound(); };
   $("#hLock").onclick = () => { LS.del("cq_pw"); location.reload(); };
 }
 
