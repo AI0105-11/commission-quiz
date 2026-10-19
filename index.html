@@ -248,6 +248,11 @@ details.plans summary::-webkit-details-marker{display:none}
 .lv-row:last-child{border-bottom:0}
 .hist-item .when{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}
 .mode-mini,.trap-mini{white-space:nowrap}
+.common{background:var(--accent-soft);border-radius:12px;padding:10px 14px;margin:0 0 12px;font-size:14px;line-height:1.6}
+.common .ct{display:block;font-weight:800;color:var(--accent);margin-bottom:2px}
+.common ul{margin:0;padding-left:18px}
+.common li{margin:2px 0}
+.common b{color:var(--accent)}
 .scope-mini{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--surface2);color:var(--muted);font-weight:700;vertical-align:2px;white-space:nowrap}
 </style>
 </head>
@@ -297,7 +302,7 @@ details.plans summary::-webkit-details-marker{display:none}
 const TYPES = ["攜碼", "新辦", "續約"];
 const PERIODS = ["24", "30", "36", "48"];
 const ROUND = 20;
-const AUTO_NEXT_MS = 1200;
+const AUTO_NEXT_MS = 3500;   // 答對後自動跳題（有時間看共通點；碰觸或捲動畫面就停止）
 const RETRY_MAX = 2;        // 同一題在同一輪最多重考次數
 const TRAP_P = 0.5;         // 同格位有陷阱格時，優先抽陷阱格的機率
 const PASS_SCORE = 18;      // 過關門檻：20 題首答對 18 題（90%）
@@ -646,6 +651,60 @@ document.addEventListener("keydown", (e) => {
   else if (session.answered && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); goNext(); }
 });
 
+/* ---------- 共通點說明 ----------
+   作答後比較三家「同一個方案名稱」：這個類型有哪些期數、同一格各家多少、誰最高或數字相同。 */
+function perLabel(pers) {
+  if (!pers.length) return "";
+  const idx = pers.map((p) => PERIODS.indexOf(p));
+  const contiguous = idx.every((v, i) => i === 0 || v === idx[i - 1] + 1);
+  if (pers.length >= 3 && contiguous) return `${pers[0]}～${pers[pers.length - 1]} 期`;
+  return `${pers.join("、")} 期`;
+}
+function commonNotes(it) {
+  const notes = [], name = it.p.name, t = it.t, TN = TYPES[t];
+  const short = (c) => CA_SHORT[c.id] || c.name;
+  const holders = DATA.carriers.map((c) => ({ c, p: c.plans.find((p) => p.name === name) })).filter((x) => x.p);
+  const persOf = (p) => PERIODS.filter((per) => p.rates[per] && p.rates[per][t] != null);
+  const withT = holders.map((x) => ({ c: x.c, pers: persOf(x.p) })).filter((x) => x.pers.length);
+  const noT = DATA.carriers.filter((c) => !withT.some((x) => x.c === c));
+  // 1. 期數範圍
+  if (withT.length === 1) {
+    const pers = withT[0].pers, miss = PERIODS.filter((p) => !pers.includes(p));
+    notes.push(`${esc(name)} 的${TN}只有<b>${short(withT[0].c)}</b>有，期數：${perLabel(pers)}${miss.length ? `（沒有 ${perLabel(miss)}）` : ""}`);
+  } else if (withT.length > 1) {
+    const same = withT.every((x) => x.pers.join() === withT[0].pers.join());
+    const who = withT.length === DATA.carriers.length ? "三家" : withT.map((x) => short(x.c)).join("、");
+    if (same) {
+      const pers = withT[0].pers, miss = PERIODS.filter((p) => !pers.includes(p));
+      notes.push(`${who}的 ${esc(name)} ${TN}${miss.length ? `都只有 <b>${perLabel(pers)}</b>，沒有 ${perLabel(miss)}` : "都有 24～48 期"}`);
+    } else {
+      notes.push(`${esc(name)} 的${TN}期數各家不同：${withT.map((x) => `${x.c === it.c ? "<b>" : ""}${short(x.c)} ${perLabel(x.pers)}${x.c === it.c ? "</b>" : ""}`).join("；")}`);
+    }
+    if (noT.length) notes.push(`${noT.map(short).join("、")}沒有 ${esc(name)} 的${TN}`);
+  }
+  // 2. 三家同一格比較
+  const vals = holders.map((x) => ({ c: x.c, v: x.p.rates[it.per] ? x.p.rates[it.per][t] : null })).filter((x) => x.v != null);
+  if (vals.length >= 2) {
+    notes.push(`各家 ${esc(name)} ${it.per} 期${TN}：${vals.map((x) => (x.c === it.c ? `<b>${short(x.c)} ${x.v}</b>` : `${short(x.c)} ${x.v}`)).join("｜")}`);
+    // 數字相同的各家（目前這家排前面）
+    const groups = {};
+    for (const x of vals) (groups[x.v] = groups[x.v] || []).push(x.c);
+    const dup = Object.entries(groups).filter(([, cs]) => cs.length > 1);
+    for (const [v, cs] of dup) {
+      cs.sort((a, b) => (a === it.c ? -1 : b === it.c ? 1 : 0));
+      notes.push(`${cs.map(short).join("和")}這格一樣都是 <b>${v}</b>`);
+    }
+    if (!dup.length && vals.length >= 3) {
+      const mx = vals.reduce((a, b) => (b.v > a.v ? b : a)), mn = vals.reduce((a, b) => (b.v < a.v ? b : a));
+      notes.push(`這格${short(mx.c)}最高、${short(mn.c)}最低`);
+    }
+  } else if (withT.length >= 2 && vals.length === 1) {
+    const others = holders.filter((x) => x.c !== it.c).map((x) => short(x.c));
+    notes.push(`${it.per} 期${TN}只有${short(it.c)}有，${others.join("、")}的 ${esc(name)} 沒有這格`);
+  }
+  return notes;
+}
+
 let autoTimer = null;
 function answer(value, chosenIdx) {
   const s = session, { it, opts } = s.cur, q = s.q;
@@ -680,6 +739,7 @@ function answer(value, chosenIdx) {
   $("#reveal").innerHTML = `
     ${verdict}
     ${it.trap.length ? `<div class="trap"><b>⚠ 陷阱格</b>${it.trap.map((m) => `<div>${esc(m)}</div>`).join("")}</div>` : ""}
+    ${(() => { const n = commonNotes(it); return n.length ? `<div class="common"><span class="ct">💡 共通點</span><ul>${n.map((x) => `<li>${x}</li>`).join("")}</ul></div>` : ""; })()}
     ${requeued ? `<div class="hint" style="text-align:left;margin:0 2px 10px">這題稍後會再考一次</div>` : ""}
     <div class="card plan-card"><h3><span class="carrier" style="--cc:${esc(it.c.color)}">${esc(it.c.name)}</span> ${esc(it.p.name)}</h3>${rateTable(it.c, it.p, it)}</div>`;
   $("#progBar").style.width = `${progress(1)}%`;
@@ -695,6 +755,10 @@ function goNext() {
   if (roundDone()) endRound(); else renderQuestion();
 }
 $("#nextBtn").addEventListener("click", goNext);
+// 答對後正在閱讀說明：碰觸或捲動就取消自動跳題
+["touchstart", "wheel", "mousedown"].forEach((ev) => document.addEventListener(ev, (e) => {
+  if (autoTimer && !e.target.closest("#nextBtn")) { clearTimeout(autoTimer); autoTimer = null; }
+}, { passive: true }));
 
 /* ---------- 結算、過關判定 ---------- */
 function endRound() {
