@@ -253,6 +253,45 @@ details.plans summary::-webkit-details-marker{display:none}
 .common ul{margin:0;padding-left:18px}
 .common li{margin:2px 0}
 .common b{color:var(--accent)}
+.calc-row{margin-bottom:12px}
+.calc-grid{display:grid;gap:8px}
+.calc-grid.g2{grid-template-columns:repeat(2,1fr)}.calc-grid.g3{grid-template-columns:repeat(3,1fr)}.calc-grid.g4{grid-template-columns:repeat(4,1fr)}
+.cbtn{min-height:48px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:15px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2;text-align:center;word-break:break-word}
+.cbtn small{font-size:12px;font-weight:600;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.cbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.cbtn[aria-pressed="true"] small{color:inherit;opacity:.85}
+.cbtn.c-twm[aria-pressed="true"]{background:#e8710a;border-color:#e8710a;color:#fff}
+.cbtn.c-cht[aria-pressed="true"]{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.cbtn.c-fet[aria-pressed="true"]{background:#d11f3a;border-color:#d11f3a;color:#fff}
+.cbtn:disabled{opacity:.35;cursor:not-allowed}
+.cbtn.dim{opacity:.55;border-style:dashed}
+.res-card{border-top:6px solid var(--accent)}
+.res-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+.res-head b{font-size:20px}
+.res-head .tag{font-size:13px;padding:3px 10px}
+.res-base{display:flex;align-items:baseline;justify-content:space-between;padding:4px 0 10px;border-bottom:1px solid var(--line)}
+.res-base b{font-size:40px;font-weight:800}
+.res-line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:15px}
+.res-line b{text-align:right}
+.res-line .cnote{display:block;font-size:12px;font-weight:600;color:var(--bad)}
+.res-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;font-size:18px;font-weight:800}
+.res-total b{font-size:32px;color:var(--accent)}
+.res-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 8px}
+.res-two div{background:var(--surface2);border-radius:12px;padding:10px;text-align:center}
+.res-two span{display:block;font-size:13px;color:var(--muted)}
+.res-two b{font-size:30px}
+.res-status{font-size:22px;font-weight:800;color:var(--bad);padding:6px 0}
+b.pos{color:var(--good)} b.neg{color:var(--bad)}
+.tg{padding:6px 0;border-bottom:1px dashed var(--line);align-items:center}
+.tg span{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.tg small{flex-basis:100%;font-size:12px;color:var(--muted)}
+.tg-ren{padding:8px 0;border-bottom:1px dashed var(--line)}
+.tg-ren>span{display:block;margin-bottom:6px}
+.tg-ren .seg button{font-size:13px;min-height:36px}
+.warn-txt{display:block;margin-top:6px;font-size:12px;color:#a35a00}
+.notes ul{margin:0;padding-left:18px;font-size:14px;line-height:1.6}
+.cmp{font-size:16px}
+.cmp b{color:var(--accent)}
 .scope-mini{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--surface2);color:var(--muted);font-weight:700;vertical-align:2px;white-space:nowrap}
 </style>
 </head>
@@ -276,6 +315,7 @@ details.plans summary::-webkit-details-marker{display:none}
   <div class="wrap">
     <div class="qtop">
       <button class="x" id="histBtn" aria-label="過往紀錄"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
+      <button class="x" id="calcBtn" aria-label="佣金計算機"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 18h8"/></svg></button>
       <button class="scope" id="scopeBtn" aria-label="練習範圍"><span id="scopeTxt"></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="restart" id="restartBtn" aria-label="重新開始"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span id="restartTxt">重來</span></button>
     </div>
@@ -291,6 +331,9 @@ details.plans summary::-webkit-details-marker{display:none}
 
 <!-- 過往紀錄 -->
 <section id="history" class="hidden"><div class="wrap" id="historyBody"></div></section>
+
+<!-- 佣金計算機 -->
+<section id="calc" class="hidden"><div class="wrap" id="calcBody"></div></section>
 
 <!-- 練習範圍 -->
 <div class="sheet-bg hidden" id="sheetBg"><div class="sheet" id="sheet" role="dialog" aria-label="練習範圍"></div></div>
@@ -559,7 +602,7 @@ function makeOptions(it) {
 }
 
 /* ---------- 作答 ---------- */
-function show(id) { ["#quiz", "#summary", "#history"].forEach((s) => $(s).classList.toggle("hidden", s !== id)); $("#nextDock").classList.add("hidden"); window.scrollTo(0, 0); }
+function show(id) { ["#quiz", "#summary", "#history", "#calc"].forEach((s) => $(s).classList.toggle("hidden", s !== id)); $("#nextDock").classList.add("hidden"); window.scrollTo(0, 0); }
 
 function startRound() {
   if (restartArm) disarmRestart();
@@ -903,6 +946,185 @@ function renderHistory(from) {
   $("#hRestart").onclick = () => startRound();
   $("#hLock").onclick = () => { LS.del("cq_pw"); location.reload(); };
 }
+
+/* ---------- 佣金計算機 ----------
+   點選 電信 → 類型 → 期數 → 資費，立即顯示基本佣金、上線卡片與加碼、可勾選的加減項、合計、注意事項、三家同格比較。 */
+const CT = { aq: "新辦", np: "攜碼", rt: "續約", fx: "固網成雙" };
+let calc = LS.get("cq_calc", { ca: "twm", ty: "np", per: "24", plan: null, opt: {} });
+const cCar = () => DATA.calc.carriers.find((c) => c.id === calc.ca) || DATA.calc.carriers[0];
+const statusType = (st) => (st && st.includes("續約") ? "rt" : "aqnp");
+function cPlans(c, ty) {
+  if (ty === "fx") return (c.fixed || []).map((f) => ({ ...f, _fx: true }));
+  const rank = (p) => (/^5G/.test(p.name) ? 0 : 1) * 1e6 - priceOf(p.name);
+  return c.plans.filter((p) => (p[ty] && Object.keys(p[ty]).length) || (p.status && statusType(p.status) === (ty === "rt" ? "rt" : "aqnp")))
+    .sort((a, b) => rank(a) - rank(b));
+}
+const cPeriods = (ty) => (ty === "fx" ? ["24", "36", "48"] : PERIODS);
+function cVal(p, ty, per) {
+  if (!p) return null;
+  if (p._fx) { const a = p.aq[per], n = p.np[per]; return a == null && n == null ? null : { aq: a, np: n }; }
+  return p[ty] && p[ty][per] != null ? p[ty][per] : null;
+}
+const hasVals = (p, ty) => p._fx || (p[ty] && Object.keys(p[ty]).length);
+function cFix() {
+  const c = cCar();
+  if (calc.ty === "fx" && !c.fixed) calc.ty = "np";
+  if (!cPeriods(calc.ty).includes(calc.per)) calc.per = cPeriods(calc.ty)[0];
+  const plans = cPlans(c, calc.ty);
+  const p = plans.find((x) => x.name === calc.plan);
+  if (!p) { calc.plan = null; return; }
+  if (hasVals(p, calc.ty) && cVal(p, calc.ty, calc.per) == null) {
+    const first = cPeriods(calc.ty).find((per) => cVal(p, calc.ty, per) != null);
+    if (first) calc.per = first;
+  }
+}
+function saveCalc() { LS.set("cq_calc", calc); }
+
+function openCalc() { clearTimeout(autoTimer); cFix(); renderCalc(); show("#calc"); }
+function renderCalc() {
+  const c = cCar(), ty = calc.ty, plans = cPlans(c, ty);
+  const sel = plans.find((x) => x.name === calc.plan) || null;
+  const btn = (attrs, pressed, label, sub, disabled, extraCls = "") =>
+    `<button class="cbtn ${extraCls}" ${attrs} aria-pressed="${pressed}" ${disabled ? "disabled" : ""}>${label}${sub ? `<small>${sub}</small>` : ""}</button>`;
+  const carRow = DATA.calc.carriers.map((x) => btn(`data-cca="${x.id}"`, x.id === calc.ca, esc(CA_SHORT[x.id] || x.name), "", false, `c-${x.id}`)).join("");
+  const tys = ["aq", "np", "rt"].concat(c.fixed ? ["fx"] : []);
+  const tyRow = tys.map((t) => btn(`data-cty="${t}"`, t === ty, CT[t], "", false)).join("");
+  const perRow = cPeriods(ty).map((per) => {
+    // 任何方案都沒有的期數才鎖住；目前方案沒有的期數仍可點（會取消方案，改看該期數各方案）
+    const any = plans.some((p) => cVal(p, ty, per) != null);
+    const selHas = !(sel && hasVals(sel, ty)) || cVal(sel, ty, per) != null;
+    return btn(`data-cper="${per}"`, per === calc.per, `${per} 期`, "", !any, any && !selHas ? "dim" : "");
+  }).join("");
+  const planRow = plans.map((p) => {
+    const v = cVal(p, ty, calc.per);
+    let sub = "";
+    if (p.status && !hasVals(p, ty)) sub = esc(p.status.replace(/^(新辦／攜碼|續約)/, "") || p.status);
+    else if (v == null) sub = "無此期數";
+    else sub = p._fx ? `${v.aq ?? "—"}／${v.np ?? "—"}` : String(v);
+    // 這個期數沒有的方案仍可點，點了會自動切到它有的期數
+    return btn(`data-cpl="${esc(p.name)}"`, p.name === calc.plan, esc(p.name), sub, false, hasVals(p, ty) && v == null ? "dim" : "");
+  }).join("");
+  $("#calcBody").innerHTML = `
+    <div class="row-between" style="margin-bottom:8px"><button class="back" id="calcBack">‹ 回測驗</button><span class="pill">${esc(c.name)} ${esc(c.date || "")}</span></div>
+    <div class="brand" style="margin-bottom:12px">佣金計算機</div>
+    <div class="calc-row"><p class="sec-title">電信</p><div class="calc-grid g3">${carRow}</div></div>
+    <div class="calc-row"><p class="sec-title">類型</p><div class="calc-grid g${tys.length}">${tyRow}</div></div>
+    <div class="calc-row"><p class="sec-title">期數</p><div class="calc-grid g${cPeriods(ty).length}">${perRow}</div></div>
+    <div class="calc-row"><p class="sec-title">資費${ty === "fx" ? "（台哥大資費・新辦／攜碼）" : ""}</p><div class="calc-grid g3">${planRow}</div></div>
+    <div id="calcResult">${calcResult(c, sel)}</div>`;
+}
+
+function calcResult(c, p) {
+  if (!p) return `<div class="card empty" style="padding:20px">點選上方資費，就會顯示佣金與注意事項</div>`;
+  const ty = calc.ty, per = calc.per, o = calc.opt || {};
+  const head = `<div class="res-head"><span class="carrier" style="--cc:${esc(c.color)}">${esc(c.name)}</span><b>${esc(p.name)}</b><span class="tag">${per} 期</span><span class="tag">${CT[ty]}</span></div>`;
+  const rules = ((c.rules || {})[ty === "rt" ? "rt" : ty === "fx" ? "fixed" : "aqnp"] || []);
+  const notesBox = (extra) => {
+    const all = extra.concat(rules);
+    return all.length ? `<div class="card notes"><p class="sec-title">注意事項</p><ul>${all.map((x) => `<li>${x}</li>`).join("")}</ul></div>` : "";
+  };
+  // 固網成雙
+  if (p._fx) {
+    const v = cVal(p, ty, per);
+    return `<div class="card res-card">${head}
+      <div class="res-two num"><div><span>新辦</span><b>${v ? v.aq ?? "X" : "X"}</b></div><div><span>攜碼</span><b>${v ? v.np ?? "X" : "X"}</b></div></div>
+      <div class="res-line"><span>固網速度</span><b>${esc(p.speed)}</b></div></div>
+      ${notesBox(per === "48" && !v ? ["此資費 48 個月不開放"] : [])}`;
+  }
+  // 停開、洗機後報價等沒有金額的方案
+  if (!hasVals(p, ty)) {
+    const adjInfo = p.adj ? adjInfoLines(p.adj) : [];
+    return `<div class="card res-card">${head}<div class="res-status">${esc(p.status || "不開放")}</div>
+      ${adjInfo.length ? `<p class="sec-title" style="margin-top:12px">表上加減項</p>${adjInfo.map((l) => `<div class="res-line"><span>${l[0]}</span><b class="num">${l[1]}</b></div>`).join("")}` : ""}</div>
+      ${notesBox(p.note ? [esc(p.note)] : [])}`;
+  }
+  const base = cVal(p, ty, per);
+  const lines = [];
+  const extraNotes = [];
+  let total = base;
+  // 上線卡片與卡片加碼
+  const cd = p.card && p.card[`${ty}${per}`];
+  let cardHtml = "";
+  if (cd) {
+    const [card, bonus, note] = cd;
+    cardHtml = `<div class="res-line"><span>上線卡片</span><b>${esc(card)}${note ? `<small class="cnote">${esc(note)}</small>` : ""}</b></div>`;
+    if (bonus) { lines.push([`${esc(card)}加碼`, bonus, true]); total += bonus; }
+  }
+  if (p.note) extraNotes.push(esc(p.note));
+  // 加減項
+  const pr = priceOf(p.name), adj = p.adj || {};
+  const toggles = [];
+  const tg = (key, label, amt, hint) => {
+    toggles.push(`<label class="switch tg"><span>${label}<b class="num ${amt < 0 ? "neg" : "pos"}">${amt > 0 ? "+" : ""}${amt}</b>${hint ? `<small>${hint}</small>` : ""}</span><input type="checkbox" data-opt="${key}" ${o[key] ? "checked" : ""}></label>`);
+    if (o[key]) { lines.push([label, amt, false]); total += amt; }
+  };
+  if (ty === "rt") {
+    if ((c.id === "twm" || c.id === "fet") && pr >= 599) tg("phone", "搭配手機、平板銷售", 300, "限傳統店；系統店無加碼");
+    if (c.id === "twm") {
+      tg("tstar", "台星升續", pr >= 999 ? 1000 : 500, pr >= 999 ? "升 5G-999（含）以上，需升 200 元（含）以上" : "升 5G-999 以下，需升 200 元（含）以上");
+      if (adj.tz != null) tg("tz", "通轉手扣佣", adj.tz, "");
+    }
+    if (c.id === "cht") {
+      if (adj.down != null) tg("cdown", "降續", adj.down, "");
+      if (adj.ip18) tg("ip18", "IP18 系列一搭一", adj.ip18, "★不可交官網品項的手機★");
+    }
+    if (c.id === "fet" && adj.up != null) {
+      const k = o.ren || "none";
+      const amt = { none: 0, up: adj.up, flat: adj.flat, down: adj.down }[k];
+      toggles.push(`<div class="tg-ren"><span>續約型態</span><div class="seg" id="renSeg">${[["none", "一般"], ["up", `升續 +${adj.up}`], ["flat", `平續 ${adj.flat}`], ["down", `降續 ${adj.down}`]].map(([v, l]) => `<button data-ren="${v}" aria-pressed="${k === v}">${l}</button>`).join("")}</div>
+        ${k === "up" ? `<small class="warn-txt">⚠ 表上註明「不認列升續加碼」，升續加碼是否發放請以主管說明為準</small>` : ""}</div>`);
+      if (k !== "none") { lines.push([{ up: "升續", flat: "平續", down: "降續" }[k], amt, false]); total += amt; }
+    }
+  }
+  if (c.id === "twm" || c.id === "fet") tg("paper", ty === "rt" ? "有紙" : "有紙回件", -500, "公司戶或店內無條碼時除外");
+  // 三家同格比較
+  const cmp = DATA.calc.carriers.map((x) => {
+    const q = x.plans.find((pp) => pp.name === p.name);
+    const v = q && q[ty] ? q[ty][per] : null;
+    return v == null ? null : `${x.id === c.id ? "<b>" : ""}${esc(CA_SHORT[x.id])} ${v}${x.id === c.id ? "</b>" : ""}`;
+  }).filter(Boolean);
+  return `<div class="card res-card">${head}
+      <div class="res-base"><span>基本佣金</span><b class="num">${base}</b></div>
+      ${cardHtml}
+      ${lines.map(([l, a]) => `<div class="res-line"><span>${l}</span><b class="num ${a < 0 ? "neg" : "pos"}">${a > 0 ? "+" : ""}${a}</b></div>`).join("")}
+      <div class="res-total"><span>合計</span><b class="num">${total}</b></div>
+    </div>
+    ${toggles.length ? `<div class="card"><p class="sec-title">加減項（依實際情況勾選）</p>${toggles.join("")}</div>` : ""}
+    ${notesBox(extraNotes)}
+    ${cmp.length >= 2 ? `<div class="card"><p class="sec-title">三家同格比較（${esc(p.name)}・${per} 期${CT[ty]}）</p><div class="cmp num">${cmp.join("｜")}</div></div>` : ""}`;
+}
+function adjInfoLines(a) {
+  const out = [];
+  if (a.up != null) out.push(["升續", `+${a.up}`]);
+  if (a.flat != null) out.push(["平續", a.flat]);
+  if (a.down != null) out.push(["降續", a.down]);
+  if (a.tz != null) out.push(["通轉手扣佣", a.tz]);
+  return out;
+}
+
+$("#calc").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.id === "calcBack") { show("#quiz"); if (session && session.answered) $("#nextDock").classList.remove("hidden"); return; }
+  if (b.dataset.cca) { calc.ca = b.dataset.cca; calc.opt = {}; }
+  else if (b.dataset.cty) { calc.ty = b.dataset.cty; calc.opt = {}; }
+  else if (b.dataset.cper) {
+    calc.per = b.dataset.cper;
+    const sp = cPlans(cCar(), calc.ty).find((x) => x.name === calc.plan);
+    if (sp && hasVals(sp, calc.ty) && cVal(sp, calc.ty, calc.per) == null) { calc.plan = null; calc.opt = {}; }
+  }
+  else if (b.dataset.cpl) { calc.plan = b.dataset.cpl; calc.opt = {}; }
+  else if (b.dataset.ren) calc.opt = { ...calc.opt, ren: b.dataset.ren };
+  else return;
+  const y = window.scrollY; cFix(); saveCalc(); renderCalc(); window.scrollTo(0, y);
+});
+$("#calc").addEventListener("change", (e) => {
+  const k = e.target.dataset && e.target.dataset.opt; if (!k) return;
+  calc.opt = { ...calc.opt, [k]: e.target.checked }; saveCalc();
+  const y = window.scrollY; renderCalc(); window.scrollTo(0, y);
+});
+$("#calcBtn").addEventListener("click", openCalc);
+
 
 boot();
 })();
