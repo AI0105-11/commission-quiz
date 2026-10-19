@@ -292,6 +292,7 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 .notes ul{margin:0;padding-left:18px;font-size:14px;line-height:1.6}
 .cmp{font-size:16px}
 .cmp b{color:var(--accent)}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
 .scope-mini{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--surface2);color:var(--muted);font-weight:700;vertical-align:2px;white-space:nowrap}
 </style>
 </head>
@@ -517,6 +518,7 @@ function start() {
     LS.set("cq_dataid", DATA.id || "");
   }
   buildItems();
+  if (scope.lv === "plan" && !sharedPlans().includes(scope.plan)) scope = { lv: 1, ca: "all" };
   if (!isUnlocked(scope.lv)) scope = { lv: 1, ca: scope.ca || "all" };
   if (scope.ca !== "all" && !DATA.carriers.some((c) => c.id === scope.ca)) scope.ca = "all";
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
@@ -525,6 +527,7 @@ function start() {
 
 /* ---------- 層級與範圍 ---------- */
 function isUnlocked(lv) {
+  if (lv === "plan") return true;   // 依資費練習隨時可用
   if (lvProg.skip) return true;
   if (lv === 1) return true;
   if (lv === 2) return lvProg[1].passed;
@@ -532,7 +535,26 @@ function isUnlocked(lv) {
   return lvProg[1].passed && lvProg[2].passed && lvProg[3].passed;   // 三層混合
 }
 const poolOf = (lv, ca) => ITEMS.filter((it) => it.lv === lv && (ca === "all" || it.c.id === ca));
-const scopeLabel = (s) => `${LEVEL_NAME[s.lv]}・${CA_SHORT[s.ca]}`;
+const scopeLabel = (s) => (s.lv === "plan" ? `${s.plan}・三家同資費` : `${LEVEL_NAME[s.lv]}・${CA_SHORT[s.ca]}`);
+// 三家都有的資費（依資費練習用）
+function sharedPlans() {
+  const m = new Map();
+  for (const it of ITEMS) { if (!m.has(it.p.name)) m.set(it.p.name, new Set()); m.get(it.p.name).add(it.c.id); }
+  return [...m.entries()].filter(([, s]) => s.size === DATA.carriers.length).map(([n]) => n).sort((a, b) => priceOf(a) - priceOf(b));
+}
+// 依資費練習：讓相鄰兩題盡量不同期數、不同電信
+function interleave(items) {
+  let rest = shuffle(items); const out = [];
+  while (rest.length) {
+    const prev = out[out.length - 1];
+    let i = prev ? rest.findIndex((x) => x.per !== prev.per && x.c !== prev.c) : 0;
+    if (i < 0) i = rest.findIndex((x) => x.per !== prev.per);
+    if (i < 0) i = rest.findIndex((x) => x.key !== prev.key);
+    if (i < 0) i = 0;
+    out.push(rest.splice(i, 1)[0]);
+  }
+  return out;
+}
 
 /* ---------- 平均抽題 ----------
    在指定題庫內，讓電信、期數、類型的題數盡量平均，同電信的方案輪流出現；
@@ -567,6 +589,10 @@ function buildFrom(pool, n) {
   return out;
 }
 function buildRound(sc) {
+  if (sc.lv === "plan") {
+    const pool = ITEMS.filter((it) => it.p.name === sc.plan);
+    return interleave(buildFrom(pool, ROUND)).map((it) => ({ it, review: false }));
+  }
   let list = [];
   for (const [lv, n] of MIX[sc.lv]) {
     const pool = poolOf(lv, sc.ca);
@@ -808,7 +834,7 @@ function endRound() {
   const s = session, sc = s.scope;
   const pure = s.modes.size === 1 && s.modes.has("input");
   const mcode = s.modes.size > 1 ? "x" : s.modes.has("input") ? "i" : "c";
-  hist.push({ at: Date.now(), c: s.firstOk, n: ROUND, w: s.firstWrong.map((it) => it.key), m: mcode, r: [s.retryOk, s.retryAsk], lv: sc.lv, ca: sc.ca });
+  hist.push({ at: Date.now(), c: s.firstOk, n: ROUND, w: s.firstWrong.map((it) => it.key), m: mcode, r: [s.retryOk, s.retryAsk], lv: sc.lv, ca: sc.ca, pl: sc.plan });
   LS.set("cq_hist", hist);
   // 過關：三家範圍、全程輸入數字模式、首答 18 題以上，連續兩輪
   let passMsg = "", justPassed = false;
@@ -822,7 +848,7 @@ function endRound() {
     } else if (!L.passed) {
       passMsg = sc.ca !== "all" ? "這輪是單一電信練習，不計入過關" : "這輪有使用四選一，不計入過關（過關需全程輸入數字）";
     }
-  }
+  } else if (sc.lv === "plan") passMsg = "依資費練習不計入過關";
   const nextLv = sc.lv === 1 ? 2 : sc.lv === 2 ? 3 : "all";
   const pct = Math.round((s.firstOk / ROUND) * 100);
   const modeName = mcode === "x" ? "混合模式" : mcode === "i" ? "輸入數字" : "四選一";
@@ -875,8 +901,11 @@ function renderSheet() {
     <p class="sec-title">層級</p>
     ${LEVELS.map((L) => lvBtn(L.id, LEVEL_NAME[L.id], `${L.desc}・${cnt(L.id)} 格${L.id > 1 ? "・每輪含 6 題複習" : ""}`)).join("")}
     ${lvBtn("all", "三層混合", "核心 10 題＋進階 6 題＋高資費 4 題")}
+    <p class="sec-title" style="margin-top:14px">依資費練習（三家同資費・期數交錯出題）</p>
+    <div class="calc-grid g3">${sharedPlans().map((n) => `<button class="cbtn" data-pl="${esc(n)}" aria-pressed="${draft.lv === "plan" && draft.plan === n}">${esc(n)}<small>${ITEMS.filter((it) => it.p.name === n).length} 格</small></button>`).join("")}</div>
     <p class="sec-title" style="margin-top:14px">電信</p>
-    <div class="seg" id="caSeg">${["all", ...DATA.carriers.map((c) => c.id)].map((id) => `<button data-ca="${id}" aria-pressed="${draft.ca === id}">${CA_SHORT[id] || id}</button>`).join("")}</div>
+    <div class="seg" id="caSeg">${["all", ...DATA.carriers.map((c) => c.id)].map((id) => `<button data-ca="${id}" aria-pressed="${draft.ca === id}" ${draft.lv === "plan" && id !== "all" ? "disabled" : ""}>${CA_SHORT[id] || id}</button>`).join("")}</div>
+    ${draft.lv === "plan" ? `<p class="hint" style="text-align:left">依資費練習固定三家一起考，同一資費的新辦、攜碼、續約和各期數交錯出題，不計入過關。</p>` : ""}
     <p class="hint" style="text-align:left">過關條件：選「三家」並全程用「輸入數字」，連續兩輪答對 ${PASS_SCORE} 題以上（90%），就會解鎖下一層。單一電信適合剛開始一家一家背，不計入過關。</p>
     <button class="btn" id="applyScope" style="margin-top:14px">開始練習</button>
     <button class="btn ghost" id="closeSheet" style="margin-top:10px">取消</button>
@@ -887,10 +916,12 @@ function closeSheet() { $("#sheetBg").classList.add("hidden"); }
 $("#scopeBtn").addEventListener("click", openSheet);
 $("#sheetBg").addEventListener("click", (e) => {
   if (e.target.id === "sheetBg" || e.target.id === "closeSheet") return closeSheet();
+  const plb = e.target.closest("[data-pl]");
+  if (plb) { draft = { lv: "plan", plan: plb.dataset.pl, ca: "all" }; return renderSheet(); }
   const lvb = e.target.closest("[data-lv]");
-  if (lvb && !lvb.disabled) { const v = lvb.dataset.lv; draft.lv = v === "all" ? "all" : Number(v); return renderSheet(); }
+  if (lvb && !lvb.disabled) { const v = lvb.dataset.lv; draft.lv = v === "all" ? "all" : Number(v); delete draft.plan; return renderSheet(); }
   const cab = e.target.closest("[data-ca]");
-  if (cab) { draft.ca = cab.dataset.ca; return renderSheet(); }
+  if (cab && !cab.disabled) { draft.ca = cab.dataset.ca; return renderSheet(); }
   if (e.target.id === "applyScope") { scope = { ...draft }; LS.set("cq_scope", scope); closeSheet(); return startRound(); }
   if (e.target.id === "skipLock") {
     if (!skipArm) { skipArm = true; renderSheet(); setTimeout(() => { skipArm = false; if (!$("#sheetBg").classList.contains("hidden")) renderSheet(); }, 3000); return; }
@@ -920,7 +951,7 @@ function renderHistory(from) {
   const rows = hist.slice().reverse().map((h) => {
     const p = Math.round((h.c / h.n) * 100), cls = p >= 80 ? "hi" : p >= 60 ? "mid" : "lo";
     const ws = h.w.map((k) => BYKEY[k]).filter(Boolean);
-    const sc = h.lv ? `<span class="scope-mini">${esc(scopeLabel({ lv: h.lv, ca: h.ca || "all" }))}</span>` : "";
+    const sc = h.lv ? `<span class="scope-mini">${esc(scopeLabel({ lv: h.lv, ca: h.ca || "all", plan: h.pl }))}</span>` : "";
     return `<details class="hist-item"><summary><span class="when num">${fmtTime(h.at)} ${sc} ${modeTag(h.m)}</span><span class="sc num">${h.c}/${h.n}</span><span class="pct ${cls} num">${p}%</span></summary>
       ${ws.length ? ws.map(itemRow).join("") : `<div class="li-sub">全部答對</div>`}</details>`;
   }).join("");
