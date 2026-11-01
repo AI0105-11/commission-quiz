@@ -320,6 +320,64 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 .pcmp small{display:block;font-size:11px;color:var(--muted)}
 .pcmp .dcell{font-size:12px}
 .pcmp td:not(.dcell),.pcmp th{white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.lg{font-size:12px;padding:3px 8px;border-radius:6px;background:var(--surface2)}
+.vg{width:100%;border-collapse:separate;border-spacing:3px;table-layout:fixed;font-size:13px}
+.vg th{font-size:12px;padding:5px 2px;color:#fff;border-radius:6px;font-weight:700}
+.vg th.rh,.vg td.rh{background:none;border:0;color:var(--muted);font-weight:700;width:62px;text-align:left;font-size:12px;padding:2px}
+.vg th.ph{background:var(--surface2);color:var(--muted)}
+.vg td.rh small{display:block;font-weight:500;font-size:11px}
+.vg td{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 3px;text-align:center;line-height:1.35;vertical-align:middle;font-variant-numeric:tabular-nums;word-break:break-word}
+.vg td small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.vg td .big{font-size:18px}
+.vg td.eq3,.lg.eq3{background:var(--surface2);border-color:transparent;color:var(--muted)}
+.vg td.eq2,.lg.eq2{background:#e6f4ec;border-color:#bfe3cd}
+.vg td.hl,.lg.hl{background:#fff1cc;border-color:#f0d27a;font-weight:800}
+.vg td.na,.lg.na{background:repeating-linear-gradient(45deg,var(--surface2),var(--surface2) 4px,transparent 4px,transparent 8px);border-color:transparent;color:var(--muted)}
+.vg td.mecol{outline:2.5px solid var(--accent);outline-offset:-2px}
+.vg .bdg{display:block;font-size:10px;font-weight:800;color:#a35a00}
+.vg .zero{color:var(--muted)}
+.vg-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+.sec-title .sub{font-weight:500}
+.pchip2{display:inline-block;min-width:24px;margin:1px;padding:1px 3px;border-radius:5px;font-size:11px;color:var(--muted);text-decoration:line-through;opacity:.5}
+.pchip2.on{background:var(--accent);color:var(--accent-ink);text-decoration:none;opacity:1;font-weight:700}
+.jump div{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.jump b{background:var(--accent-soft);color:var(--accent);padding:4px 10px;border-radius:8px}
+.jump small{flex-basis:100%;color:var(--muted)}
+.cmg td.cm{padding:4px 2px;background:color-mix(in srgb,var(--accent) calc(var(--heat) * 0.35%),var(--surface))}
+.cmg .ln{font-size:12px;font-weight:700;line-height:1.45}
+.cmg .ln.miss{opacity:.35}
+.cmg .ln.eq{text-decoration:underline;text-underline-offset:2px}
+.cmg .ln.tp::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#e08a00;margin-left:2px;vertical-align:2px}
+.cmg .ln.me{background:var(--ink);color:var(--bg)!important;border-radius:4px}
+.cmg td.cur{outline:2.5px solid var(--ink);outline-offset:-2px}
+.cmg tr.currow td.rh{color:var(--ink)}
+.l-cht{color:#1f5fbf}.l-twm{color:#d0630a}.l-fet{color:#d11f3a}
+.stack-key{font-size:12px;color:var(--muted);margin:0 2px 8px;line-height:1.5}
+.posmap summary{cursor:pointer;font-weight:700;font-size:14px;margin-bottom:8px}
+.lesson{background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-bottom:10px;overflow:hidden}
+.lesson.read:not(.open){opacity:.8}
+.lesson-h{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;text-align:left}
+.lno{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:800}
+.lesson.read .lno{background:var(--good);color:#fff}
+.lt{flex:1;font-weight:800;font-size:16px}
+.lt small{display:block;font-size:11px;font-weight:700;color:var(--accent)}
+.lst{color:var(--muted);font-weight:800}
+.lesson-b{padding:0 10px 14px}
+.keybox{background:var(--accent-soft);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.keybox ol{margin:6px 0 0;padding-left:20px;font-size:14px;line-height:1.6}
+.memo{font-size:14px;font-weight:700;background:#fff1cc;color:#7a5a00;padding:8px 10px;border-radius:10px}
+.lesson-body .card{box-shadow:none;padding:12px 8px}
+.lesson-body.covered td:not(.rh):not(.na){cursor:pointer;position:relative}
+.lesson-body.covered td:not(.rh):not(.na):not(.rev) > *,.lesson-body.covered td:not(.rh):not(.na):not(.rev){color:transparent!important}
+.lesson-body.covered td:not(.rh):not(.na):not(.rev) *{visibility:hidden}
+.lesson-body.covered td:not(.rh):not(.na):not(.rev)::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-weight:800}
+.lesson-f{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.lesson-f .btn{flex:1;min-width:140px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .vg td.eq2,:root:not([data-theme="light"]) .lg.eq2{background:#173327;border-color:#24533d}
+ :root:not([data-theme="light"]) .vg td.hl,:root:not([data-theme="light"]) .lg.hl{background:#3a3110;border-color:#6b5a20}
+ :root:not([data-theme="light"]) .memo{background:#3a3110;color:#f3d77a}
+ :root:not([data-theme="light"]) .l-cht{color:#7fb0ff}:root:not([data-theme="light"]) .l-twm{color:#ffa45c}:root:not([data-theme="light"]) .l-fet{color:#ff7a7a}}
 .scope-mini{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--surface2);color:var(--muted);font-weight:700;vertical-align:2px;white-space:nowrap}
 </style>
 </head>
@@ -341,7 +399,7 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 <!-- 作答畫面 -->
 <section id="quiz" class="hidden">
   <div class="wrap">
-    <div class="seg app-seg"><button data-app="comm" aria-pressed="true">佣金測驗</button><button data-app="plan" aria-pressed="false">資費默寫</button></div>
+    <div class="seg app-seg"><button data-app="comm" aria-pressed="true">佣金測驗</button><button data-app="plan" aria-pressed="false">資費默寫</button><button data-app="notes" aria-pressed="false">重點講義</button></div>
     <div class="qtop">
       <button class="x" id="histBtn" aria-label="過往紀錄"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
       <button class="x" id="calcBtn" aria-label="佣金計算機"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 18h8"/></svg></button>
@@ -364,7 +422,7 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 <!-- 資費默寫 -->
 <section id="pquiz" class="hidden">
   <div class="wrap">
-    <div class="seg app-seg"><button data-app="comm" aria-pressed="false">佣金測驗</button><button data-app="plan" aria-pressed="true">資費默寫</button></div>
+    <div class="seg app-seg"><button data-app="comm" aria-pressed="false">佣金測驗</button><button data-app="plan" aria-pressed="true">資費默寫</button><button data-app="notes" aria-pressed="false">重點講義</button></div>
     <div class="qtop">
       <button class="x" id="pHistBtn" aria-label="資費默寫紀錄"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
       <button class="x" id="pCalcBtn" aria-label="佣金計算機"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 18h8"/></svg></button>
@@ -379,6 +437,9 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 <section id="psummary" class="hidden"><div class="wrap" id="pSummaryBody"></div></section>
 <section id="phist" class="hidden"><div class="wrap" id="pHistBody"></div></section>
 <div class="sheet-bg hidden" id="psheetBg"><div class="sheet" id="psheet" role="dialog" aria-label="資費默寫範圍"></div></div>
+
+<!-- 重點講義 -->
+<section id="notes" class="hidden"><div class="wrap" id="notesBody"></div></section>
 
 <!-- 佣金計算機 -->
 <section id="calc" class="hidden"><div class="wrap" id="calcBody"></div></section>
@@ -564,6 +625,10 @@ function start() {
     if (!prevId) { hist = []; itemStat = {}; lvProg = defaultProg(); LS.set("cq_hist", hist); LS.set("cq_item", itemStat); LS.set("cq_lv", lvProg); }
     LS.set("cq_dataid", DATA.id || "");
   }
+  // 三家順序統一：中華｜台灣大｜遠傳
+  const ORD = ["cht", "twm", "fet"];
+  DATA.carriers.sort((a, b) => ORD.indexOf(a.id) - ORD.indexOf(b.id));
+  if (DATA.calc) DATA.calc.carriers.sort((a, b) => ORD.indexOf(a.id) - ORD.indexOf(b.id));
   buildItems();
   if (scope.lv === "plan" && !sharedPlans().includes(scope.plan)) scope = { lv: 1, ca: "all" };
   if (!isUnlocked(scope.lv)) scope = { lv: 1, ca: scope.ca || "all" };
@@ -571,7 +636,9 @@ function start() {
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
   buildPItems();
   startRound();
-  if (appMode === "plan" && PITEMS.length) startPRound(); else appMode = "comm";
+  if (appMode === "plan" && PITEMS.length) startPRound();
+  else if (appMode === "notes") { renderNotes(); show("#notes"); }
+  else appMode = "comm";
 }
 
 /* ---------- 層級與範圍 ---------- */
@@ -677,7 +744,7 @@ function makeOptions(it) {
 }
 
 /* ---------- 作答 ---------- */
-function show(id) { ["#quiz", "#summary", "#history", "#calc", "#pquiz", "#psummary", "#phist"].forEach((s) => $(s).classList.toggle("hidden", s !== id)); $("#nextDock").classList.add("hidden"); $("#pNextDock").classList.add("hidden"); window.scrollTo(0, 0); }
+function show(id) { ["#quiz", "#summary", "#history", "#calc", "#pquiz", "#psummary", "#phist", "#notes"].forEach((s) => $(s).classList.toggle("hidden", s !== id)); $("#nextDock").classList.add("hidden"); $("#pNextDock").classList.add("hidden"); window.scrollTo(0, 0); }
 
 function startRound() {
   if (restartArm) disarmRestart();
@@ -859,7 +926,10 @@ function answer(value, chosenIdx) {
     ${it.trap.length ? `<div class="trap"><b>⚠ 陷阱格</b>${it.trap.map((m) => `<div>${esc(m)}</div>`).join("")}</div>` : ""}
     ${(() => { const n = commonNotes(it); return n.length ? `<div class="common"><span class="ct">💡 共通點</span><ul>${n.map((x) => `<li>${x}</li>`).join("")}</ul></div>` : ""; })()}
     ${requeued ? `<div class="hint" style="text-align:left;margin:0 2px 10px">這題稍後會再考一次</div>` : ""}
-    <div class="card plan-card"><h3><span class="carrier" style="--cc:${esc(it.c.color)}">${esc(it.c.name)}</span> ${esc(it.p.name)}</h3>${rateTable(it.c, it.p, it)}</div>`;
+    <div class="card plan-card"><h3><span class="carrier" style="--cc:${esc(it.c.color)}">${esc(it.c.name)}</span> ${esc(it.p.name)}</h3>${rateTable(it.c, it.p, it)}</div>
+    <details class="card posmap" open><summary>📍 這題在「${TYPES[it.t]}總表」的位置</summary>
+      <div class="stack-key">每格由上到下：<span class="l-cht">中華</span>／<span class="l-twm">台灣大</span>／<span class="l-fet">遠傳</span>；框起來的是這題</div>
+      ${commGrid(it.t, { hl: it })}</details>`;
   $("#progBar").style.width = `${progress(1)}%`;
   $("#nextBtn").textContent = roundDone() ? "看結果" : "下一題";
   $("#nextDock").classList.remove("hidden");
@@ -1269,11 +1339,12 @@ function pBuild(pool, n) {
 
 function setApp(m) {
   appMode = m; LS.set("cq_app", m);
-  if (m === "plan") { if (!pSession) startPRound(); else show("#pquiz"); }
+  if (m === "notes") { renderNotes(); show("#notes"); }
+  else if (m === "plan") { if (!pSession) startPRound(); else { show("#pquiz"); if (pSession.answered) $("#pNextDock").classList.remove("hidden"); } }
   else { show("#quiz"); if (session && session.answered) $("#nextDock").classList.remove("hidden"); }
 }
 document.addEventListener("click", (e) => { const b = e.target.closest("[data-app]"); if (b && b.dataset.app !== appMode) setApp(b.dataset.app); });
-const appSeg = (m) => `<div class="seg app-seg"><button data-app="comm" aria-pressed="${m === "comm"}">佣金測驗</button><button data-app="plan" aria-pressed="${m === "plan"}">資費默寫</button></div>`;
+const appSeg = (m) => `<div class="seg app-seg"><button data-app="comm" aria-pressed="${m === "comm"}">佣金測驗</button><button data-app="plan" aria-pressed="${m === "plan"}">資費默寫</button><button data-app="notes" aria-pressed="${m === "notes"}">重點講義</button></div>`;
 
 function startPRound() {
   const pool = pPool(pScope);
@@ -1361,20 +1432,21 @@ function gradeP() {
 }
 // 共通點：同資費、同期數的各家（含攜碼／新申辦）比較
 function pCompare(it) {
-  const same = PITEMS.filter((x) => x.price === it.price && x.per === it.per && x.net === it.net && !!x.student === !!it.student);
-  if (same.length < 2) return "";
-  const fmt = (v) => (v === "洽" ? "洽" : v);
-  const rows = same.map((x) => `<tr${x === it ? ' class="me"' : ""}><td>${esc(CA_SHORT[x.c.id])}${x.ty === "新申辦" ? "<small>新辦</small>" : ""}</td><td>${fmt(x.disc)}</td><td>${fmt(x.pre)}</td><td>${x.off}</td><td class="dcell">${esc(x.data)}</td></tr>`).join("");
-  const notes = [];
-  const others = same.filter((x) => x !== it && x.c !== it.c);
-  const sameContent = others.filter((x) => x.data === it.data && x.on === it.on && x.off === it.off && x.land === it.land);
-  if (sameContent.length) notes.push(`${[...new Set(sameContent.map((x) => CA_SHORT[x.c.id]))].join("、")}的方案內容（傳輸量、網內、網外）和這家完全相同`);
-  const sameMoney = others.filter((x) => x.disc === it.disc && x.pre === it.pre && it.disc !== "洽");
-  if (sameMoney.length) notes.push(`商品折扣和預繳跟${[...new Set(sameMoney.map((x) => CA_SHORT[x.c.id]))].join("、")}一樣`);
-  return `<div class="common"><span class="ct">💡 共通點：${esc(String(it.price))}（${it.per}）各家比較</span>
-    <table class="pcmp num"><thead><tr><th>電信</th><th>折扣</th><th>預繳</th><th>網外</th><th>傳輸量</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="li-sub">「洽」＝請洽門市</div>
-    ${notes.length ? `<ul>${notes.map((x) => `<li>${x}</li>`).join("")}</ul>` : ""}</div>`;
+  const ids = ["cht", "twm", "fet"];
+  const cols = ids.map((id) => {
+    const cands = PITEMS.filter((x) => x.c.id === id && x.price === it.price && x.per === it.per && x.net === it.net && !!x.student === !!it.student && x.name.includes("12.3GB") === it.name.includes("12.3GB"));
+    return cands.find((x) => x.ty === it.ty) || cands.find((x) => x.ty === "攜碼") || null;
+  });
+  if (cols.filter(Boolean).length < 2) return "";
+  const fmt = (v) => (v === "洽" ? "洽門市" : v);
+  const row = (label, fn) => {
+    const vals = cols.map((x) => (x ? String(fn(x)) : null)), cls = rowClasses(vals);
+    return `<tr><td class="rh">${label}</td>${cols.map((x, i) => `<td class="${cls[i]}${x === it ? " mecol" : ""}">${x ? fn(x) : "—"}</td>`).join("")}</tr>`;
+  };
+  return `<div class="card"><p class="sec-title">💡 同位置對照：${esc(String(it.price))}（${it.per}）${it.student ? "學生" : ""}</p>
+    <table class="vg"><thead><tr><th class="rh"></th>${carHead()}</tr></thead><tbody>
+      ${row("商品折扣", (x) => fmt(x.disc))}${row("預繳", (x) => fmt(x.pre))}${row("傳輸量", (x) => shortData(x.data))}${row("網內", (x) => esc(x.on))}${row("網外", (x) => x.off)}${cols.some((x) => x && x.land != null) ? row("市話", (x) => (x.land != null ? x.land : "—")) : ""}
+    </tbody></table><div class="vg-note">框起來的是這題；淡色＝和別家相同、黃底＝台灣大和遠傳不同${it.ty === "新申辦" ? "；中華、台灣大沒有新申辦報價，以攜碼對照" : ""}</div></div>`;
 }
 function nextP() {
   const s = pSession; if (!s || !s.answered) return;
@@ -1458,6 +1530,216 @@ $("#pRestartBtn").addEventListener("click", () => {
 });
 $("#pHistBtn").addEventListener("click", () => renderPHist("#pquiz"));
 $("#pCalcBtn").addEventListener("click", openCalc);
+
+
+/* ==========================================================
+   重點講義：由淺入深、位置固定的圖像記憶
+   三家永遠是 中華｜台灣大｜遠傳（同顏色），資費永遠由小到大、由上往下
+   ========================================================== */
+const CAR_ORDER = ["cht", "twm", "fet"];
+let nTab = LS.get("cq_ntab", "plan");          // plan：資費講義｜comm：佣金講義
+let nType = LS.get("cq_ntype", 0);             // 佣金總表類型：0 攜碼 1 新辦 2 續約
+let nRead = LS.get("cq_nread", {});            // 已讀的課
+let nOpen = null;                               // 目前展開的課
+let nCover = {};                                // 各課是否遮住數字
+const carById = (id) => DATA.carriers.find((c) => c.id === id);
+const carHead = () => CAR_ORDER.map((id) => { const c = carById(id); return `<th style="background:${c.color}">${esc(CA_SHORT[id])}</th>`; }).join("");
+
+/* ---------- 資費表格 ---------- */
+function planCell(id, price, per) {
+  return PITEMS.find((x) => x.c.id === id && x.ty === "攜碼" && x.net === "5G" && !x.student && x.price === price && (!per || x.per === per));
+}
+// 依「三家是否相同」決定每格底色：eq3 三家相同｜eq2 和某家相同｜hl 台灣大與遠傳不同｜na 沒有
+function rowClasses(vals) {
+  const has = vals.map((v) => v != null);
+  return vals.map((v, i) => {
+    if (v == null) return "na";
+    if (has.every(Boolean) && vals[0] === vals[1] && vals[1] === vals[2]) return "eq3";
+    if (vals.some((x, j) => j !== i && x != null && x === v)) return "eq2";
+    if (i > 0 && has[1] && has[2] && vals[1] !== vals[2]) return "hl";
+    return "";
+  });
+}
+function vgrid(title, sub, rows, note) {
+  return `<div class="card"><p class="sec-title">${title}${sub ? `<small class="sub"> ${sub}</small>` : ""}</p>
+    <table class="vg"><thead><tr><th class="rh"></th>${carHead()}</tr></thead><tbody>
+    ${rows.map((r) => `<tr><td class="rh">${r.label}</td>${r.cells.map((c) => `<td class="${c.cls || ""}">${c.html}</td>`).join("")}</tr>`).join("")}
+    </tbody></table>${note ? `<div class="vg-note">${note}</div>` : ""}</div>`;
+}
+const shortData = (d) => d.replace("5G ", "").replace("→4G 降速", "／").replace("→4G 不降速", "／不降速").replace("吃到飽（熱點分享50G，到量降4G）", "吃到飽<small>熱點50G</small>").replace(/^5G 吃到飽$/, "吃到飽<small>5G</small>");
+function planBlocks() {
+  const out = {};
+  out.data = vgrid("傳輸量", "（5G 攜碼）", PRICES.map((p) => {
+    const its = CAR_ORDER.map((id) => planCell(id, p)), cls = rowClasses(its.map((x) => (x ? x.data : null)));
+    return { label: `${p}`, cells: its.map((x, i) => ({ html: x ? shortData(x.data) : "—", cls: cls[i] })) };
+  }), "台灣大＝遠傳；GB 數三家都一樣：24／36／60／100／吃到飽");
+  out.call = vgrid("通話", "大字＝網外分鐘", PRICES.map((p) => {
+    const its = CAR_ORDER.map((id) => planCell(id, p)), cls = rowClasses(its.map((x) => (x ? `${x.on}|${x.off}|${x.land}` : null)));
+    return { label: `${p}`, cells: its.map((x, i) => ({ html: x ? `<b class="big">${x.off}</b><small>${x.on === "免費" ? "網內免費" : esc(x.on.replace("每通", ""))}${x.land != null ? `<br>市話 ${x.land}` : ""}</small>` : "—", cls: cls[i] })) };
+  }), "中華網外剛好是另外兩家的一半（30／45／60／80／110 ↔ 60／90／120／160／220）");
+  const pp = [];
+  for (const p of PRICES) for (const per of ["24", "30", "36"]) if (CAR_ORDER.some((id) => planCell(id, p, per))) pp.push([p, per]);
+  const money = (key, title, note) => vgrid(title, "（5G 攜碼）", pp.map(([p, per]) => {
+    const its = CAR_ORDER.map((id) => planCell(id, p, per)), cls = rowClasses(its.map((x) => (x ? x[key] : null)));
+    return { label: `${p}<small>（${per}）</small>`, cells: its.map((x, i) => {
+      if (!x) return { html: "—", cls: "na" };
+      let badge = "";
+      if (key === "disc" && i === 2 && its[1] && its[1].disc !== x.disc) badge = `<span class="bdg">比台灣大 +${x.disc - its[1].disc}</span>`;
+      if (key === "pre" && i === 2 && x.pre && x.disc - x.pre === 700) badge = `<span class="bdg">＝折扣−700</span>`;
+      return { html: `${x[key] === 0 ? '<span class="zero">0</span>' : x[key]}${badge}`, cls: cls[i] };
+    }) };
+  }), note);
+  out.disc = money("disc", "商品折扣", "台灣大、遠傳只差三格（遠傳 +100／+200／+300）；台遠 999 以上：30 期＝24 期＋2000；36 期＝30 期＋1500（三家）");
+  out.pre = money("pre", "預繳", "台遠的 599～999（24／30）都是 0；遠傳有預繳時＝折扣−700；台灣大 1199 要預繳、遠傳不用");
+  out.per = vgrid("期數地圖", "（5G 攜碼有哪些期數）", PRICES.map((p) => ({
+    label: `${p}`,
+    cells: CAR_ORDER.map((id) => ({ html: ["24", "30", "36"].map((per) => `<span class="pchip2${planCell(id, p, per) ? " on" : ""}">${per}</span>`).join("") }))
+  })), "中華 1199 只有 30 期；中華 1399 多一個 36 期；999 三家都有 36 期");
+  out.student = `<div class="card"><p class="sec-title">學生方案往上跳一級</p>
+    <div class="jump"><div><b>學生 599</b><span>＝</span><b>一般 799</b><small>36GB／21Mbps／網外 90</small></div>
+    <div><b>學生 699</b><span>＝</span><b>一般 999</b><small>60GB／不降速／網外 120</small></div></div>
+    <div class="vg-note">台灣大、遠傳；只有 30 期，折扣請洽門市，預繳 0</div></div>`;
+  out.g4 = `<div class="card"><p class="sec-title">4G 易混：學生 388</p>
+    <table class="vg"><thead><tr><th class="rh"></th><th style="background:#e8710a">台灣大</th><th style="background:#d11f3a">遠傳</th></tr></thead><tbody>
+    <tr><td class="rh">期數</td><td class="hl">30</td><td class="hl">24</td></tr>
+    <tr><td class="rh">傳輸量</td><td class="hl">6GB<small>前6個月吃到飽</small></td><td class="hl">5GB</td></tr>
+    <tr><td class="rh">網內</td><td class="hl">免費</td><td class="hl">前3分免費<small>＋網內30分</small></td></tr>
+    <tr><td class="rh">網外／市話</td><td class="hl">35／—</td><td class="hl">30／40</td></tr></tbody></table>
+    <div class="vg-note">遠傳 399 有兩個：399（24）3.3GB；吃到飽 399（30）6GB、折扣 2000。遠傳 299 有兩個：2.3GB（網外 20）、12.3GB（網外 60＋市話 60）</div></div>`;
+  return out;
+}
+
+/* ---------- 佣金總表：資費 × 期數，每格由上到下固定 中、台、遠 ---------- */
+function commGrid(t, opts = {}) {
+  const hl = opts.hl || null;
+  let names = [...new Set(ITEMS.filter((it) => it.t === t).map((it) => it.p.name))].sort((a, b) => priceOf(a) - priceOf(b));
+  if (opts.prices) names = names.filter((n) => opts.prices.includes(priceOf(n)));
+  const pers = opts.pers || PERIODS;
+  const max = Math.max(...ITEMS.filter((it) => it.t === t).map((it) => it.ans));
+  const rows = names.map((n) => {
+    const cells = pers.map((per) => {
+      const vals = CAR_ORDER.map((id) => BYKEY[`${id}|${n}|${per}|${t}`] || null);
+      if (vals.every((v) => !v)) return `<td class="na"></td>`;
+      const nums = vals.map((v) => (v ? v.ans : null)), got = nums.filter((x) => x != null);
+      const heat = Math.round((got.reduce((a, b) => a + b, 0) / got.length / max) * 100);
+      const lines = vals.map((v, i) => {
+        if (!v) return `<div class="ln l-${CAR_ORDER[i]} miss">·</div>`;
+        const eq = nums.some((x, j) => j !== i && x === v.ans);
+        return `<div class="ln l-${CAR_ORDER[i]}${eq ? " eq" : ""}${v.trap.length ? " tp" : ""}${hl && hl.key === v.key ? " me" : ""}">${v.ans}</div>`;
+      }).join("");
+      const inHl = hl && vals.some((v) => v && v.key === hl.key);
+      return `<td class="cm${inHl ? " cur" : ""}" style="--heat:${heat}">${lines}</td>`;
+    }).join("");
+    return `<tr${hl && hl.p.name === n ? ' class="currow"' : ""}><td class="rh">${esc(n.replace("5G-", ""))}</td>${cells}</tr>`;
+  }).join("");
+  return `<table class="vg cmg"><thead><tr><th class="rh"></th>${pers.map((p) => `<th class="ph">${p} 期</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+/* ---------- 講義內容 ---------- */
+function planLessons() {
+  if (!PITEMS.length) return [];
+  const B = planBlocks();
+  return [
+    { id: "p1", lv: "入門", title: "認識版面＋傳輸量階梯", key: ["三家由左到右永遠是 中華｜台灣大｜遠傳，資費由上往下 599 → 1399", "傳輸量三家的 GB 數都一樣：24、36、60、100、吃到飽", "到量後 4G：599 降速 12Mbps、799 降速 21Mbps，999 以上不降速"], memo: "「二四、三六、六十、一百、吃到飽」；12、21 數字對調", body: B.data, go: { plan: { ca: "all", net: "5G", price: null } } },
+    { id: "p2", lv: "入門", title: "通話：中華剛好一半", key: ["台灣大＝遠傳：網內免費，網外 60、90、120、160、220", "中華網外 30、45、60、80、110＝另外兩家的一半", "中華網內 599 每通前 5 分、799 前 10 分，999 以上免費；另有市話 40、60、75、100、140"], memo: "台遠「60 起跳，每級加 30、30、40、60」；中華「全部砍半」", body: B.call, go: { plan: { ca: "all", net: "5G", price: null } } },
+    { id: "p3", lv: "基礎", title: "期數地圖：哪些期數有、哪些沒有", key: ["599、799 三家都只有 24、30 期；999 三家都有 36 期", "中華 1199 只有 30 期", "中華 1399 多一個 36 期，台遠的 1399 只有 24、30 期"], memo: "「中華 1199 缺 24、1399 多 36」", body: B.per, go: { plan: { ca: "cht", net: "5G", price: null } } },
+    { id: "p4", lv: "進階", title: "商品折扣：台遠只差三格", key: ["台灣大和遠傳幾乎一樣，只有 599（24）、599（30）、799（24）遠傳多 100、200、300", "台遠 999 以上：30 期＝24 期＋2000", "36 期＝30 期＋1500（三家通用）；中華整體比較低"], memo: "「遠傳加一二三百」；「24 到 30 加兩千、30 到 36 加一千五」", body: B.disc, go: { plan: { ca: "all", net: "5G", price: null } } },
+    { id: "p5", lv: "進階", title: "預繳：最容易搞混", key: ["台灣大、遠傳的 599～999（24、30 期）預繳都是 0；中華每個都要預繳", "遠傳有預繳時＝折扣減 700（999 的 36 期、1399）", "1199：台灣大要預繳（8393／11990），遠傳 0"], memo: "「遠傳少七百」；「台灣大 1199 要繳、遠傳不用」", body: B.pre, go: { plan: { ca: "all", net: "5G", price: 1199 } } },
+    { id: "p6", lv: "補充", title: "學生方案與 4G 易混", key: ["學生方案往上跳一級：學生 599＝一般 799、學生 699＝一般 999", "學生 388 台灣大和遠傳每一項都不一樣", "遠傳 299、399 各有兩個版本"], memo: "「學生多一級」", body: B.student + B.g4, go: { plan: { ca: "all", net: "4G", price: null } } }
+  ];
+}
+function commLessons() {
+  const types = (prices, pers) => `<div class="seg" style="margin-bottom:8px">${TYPES.map((n, i) => `<button data-ntype="${i}" aria-pressed="${nType === i}">${n}</button>`).join("")}</div>
+    <div class="card" style="padding:10px 8px"><div class="stack-key">每格由上到下：<span class="l-cht">中華</span>／<span class="l-twm">台灣大</span>／<span class="l-fet">遠傳</span>；底色越深越高；<u>底線</u>＝和別家同數字；橘點＝陷阱</div>
+    ${commGrid(nType, { prices, pers })}</div>`;
+  const eqList = () => {
+    const rows = [];
+    const names = [...new Set(ITEMS.map((it) => it.p.name))].sort((a, b) => priceOf(a) - priceOf(b));
+    for (const n of names) for (const per of PERIODS) for (let t = 0; t < 3; t++) {
+      const v = CAR_ORDER.map((id) => BYKEY[`${id}|${n}|${per}|${t}`]);
+      for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) if (v[i] && v[j] && v[i].ans === v[j].ans)
+        rows.push(`<tr><td class="rh">${esc(n.replace("5G-", ""))}<small>（${per}）${TYPES[t]}</small></td><td class="eq2">${esc(CA_SHORT[CAR_ORDER[i]])}＝${esc(CA_SHORT[CAR_ORDER[j]])}</td><td class="eq2"><b>${v[i].ans}</b></td></tr>`);
+    }
+    return `<div class="card"><table class="vg"><thead><tr><th class="rh">資費（期數）</th><th style="background:var(--accent)">相同的兩家</th><th style="background:var(--accent)">佣金</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+  };
+  const trapList = () => {
+    const seen = new Set(), rows = [];
+    for (const it of ITEMS) for (const m of it.trap) { const k = it.c.id + m; if (seen.has(k)) continue; seen.add(k); rows.push(`<li><b class="l-${it.c.id}">${esc(CA_SHORT[it.c.id])}</b> ${esc(it.p.name)}：${esc(m)}</li>`); }
+    return `<div class="card notes"><ul>${rows.join("")}</ul></div>`;
+  };
+  return [
+    { id: "c1", lv: "入門", title: "兩條鐵律＋看懂總表", key: ["攜碼一定比新辦高（每一格都成立）", "同一列由左往右，期數越長佣金一定越高", "續約和新辦誰高沒有規律，只能對照同一格位置背"], memo: "「攜碼最高、越長越多、續約另外背」", body: types(null, null) },
+    { id: "c2", lv: "基礎", title: "核心層：5G-599／799／999 的 24、30 期", key: ["先只看這 3 列 × 2 欄，切換攜碼、新辦、續約對照著看", "599、799 的新辦攜碼只有 24、30 期", "台灣大和遠傳在 599 有好幾格同數字（底線標示）"], memo: "先記 999 的 24 期攜碼：台遠都是 9000、中華 9500", body: types([599, 799, 999], ["24", "30"]), go: { comm: 1 } },
+    { id: "c3", lv: "基礎", title: "兩家同數字的格子", key: ["台灣大和遠傳相同的格子最多，集中在 599、999、1199", "中華和遠傳只有兩格相同：799（30）攜碼 8000、1199（30）攜碼 12500"], memo: "看到台遠，先想「是不是同一個數」", body: eqList(), go: { comm: 1 } },
+    { id: "c4", lv: "進階", title: "進階層：1099～1399 全部期數", key: ["加上 36、48 期，注意斜線格（沒有的期數）", "中華新辦攜碼沒有 48 期；中華 1199 新辦攜碼沒有 36 期", "遠傳 1399 的 48 期只有攜碼"], memo: "整列由左往右看「爬樓梯」", body: types([599, 799, 999, 1099, 1199, 1399], null), go: { comm: 2 } },
+    { id: "c5", lv: "高階", title: "高資費層：1499 以上", key: ["中華、遠傳的 1499 以上只有續約", "台灣大 1599、1899、2699 新辦攜碼續約都有"], memo: "高資費先記台灣大一家", body: types([1499, 1599, 1799, 1899, 2699], null), go: { comm: 3 } },
+    { id: "c6", lv: "總複習", title: "陷阱格", key: ["違反直覺的格子，出題時會優先出現", "作答後畫面也會標「⚠ 陷阱格」"], memo: "陷阱格要「特別記住例外」", body: trapList(), go: { comm: "all" } }
+  ];
+}
+
+function renderNotes() {
+  const lessons = nTab === "plan" ? planLessons() : commLessons();
+  const done = lessons.filter((l) => nRead[l.id]).length;
+  if (nOpen === null || (nOpen && !lessons.some((l) => l.id === nOpen))) nOpen = (lessons.find((l) => !nRead[l.id]) || lessons[0] || {}).id || "";
+  const goBtn = (l) => {
+    if (!l.go) return "";
+    if (l.go.plan) return `<button class="btn sm" data-ngo="${l.id}">到資費默寫練這課</button>`;
+    const ok = isUnlocked(l.go.comm);
+    return `<button class="btn sm" data-ngo="${l.id}" ${ok ? "" : "disabled"}>${ok ? `到佣金測驗練「${LEVEL_NAME[l.go.comm]}」` : `${LEVEL_NAME[l.go.comm]}尚未解鎖`}</button>`;
+  };
+  $("#notesBody").innerHTML = `
+    ${appSeg("notes")}
+    <div class="top"><div class="brand">重點講義<small>由淺入深，一課一課讀；位置固定好記</small></div></div>
+    <div class="seg" style="margin-bottom:10px"><button data-ntab="plan" aria-pressed="${nTab === "plan"}">資費講義</button><button data-ntab="comm" aria-pressed="${nTab === "comm"}">佣金講義</button></div>
+    <div class="card" style="padding:12px 14px"><div class="row-between"><b>講義進度</b><span class="num li-sub">${done}／${lessons.length} 課</span></div><div class="bar"><i style="width:${lessons.length ? (done / lessons.length) * 100 : 0}%;background:var(--accent)"></i></div></div>
+    <div class="legend"><span class="lg eq3">三家相同</span><span class="lg eq2">兩家相同</span><span class="lg hl">兩家不同</span><span class="lg na">沒有</span></div>
+    ${lessons.map((l, i) => {
+      const open = l.id === nOpen;
+      return `<div class="lesson${open ? " open" : ""}${nRead[l.id] ? " read" : ""}" data-lid="${l.id}">
+        <button class="lesson-h" data-nopen="${l.id}"><span class="lno">${i + 1}</span><span class="lt"><small>${l.lv}</small>${esc(l.title)}</span><span class="lst">${nRead[l.id] ? "✓" : open ? "▾" : "▸"}</span></button>
+        ${open ? `<div class="lesson-b">
+          <div class="keybox"><b>本課重點</b><ol>${l.key.map((k) => `<li>${esc(k)}</li>`).join("")}</ol></div>
+          <div class="memo">🧠 ${esc(l.memo)}</div>
+          <label class="switch" style="margin:8px 0 6px"><span>遮住數字自我檢查（點格子顯示）</span><input type="checkbox" data-ncover="${l.id}" ${nCover[l.id] ? "checked" : ""}></label>
+          <div class="lesson-body${nCover[l.id] ? " covered" : ""}">${l.body}</div>
+          <div class="lesson-f">${goBtn(l)}<button class="btn sm ${nRead[l.id] ? "ghost" : ""}" data-nread="${l.id}">${nRead[l.id] ? "標為未讀" : "讀完了，下一課 ›"}</button></div>
+        </div>` : ""}
+      </div>`;
+    }).join("")}`;
+}
+document.addEventListener("click", (e) => {
+  if ($("#notes").classList.contains("hidden")) return;
+  const td = e.target.closest(".lesson-body.covered td:not(.rh):not(.na)");
+  if (td) { td.classList.toggle("rev"); return; }
+  const b = e.target.closest("[data-ntab],[data-ntype],[data-nopen],[data-nread],[data-ngo]");
+  if (!b || b.disabled) return;
+  const y = window.scrollY;
+  if (b.dataset.ntab) { nTab = b.dataset.ntab; LS.set("cq_ntab", nTab); nOpen = null; renderNotes(); window.scrollTo(0, 0); return; }
+  if (b.dataset.ntype) { nType = Number(b.dataset.ntype); LS.set("cq_ntype", nType); }
+  if (b.dataset.nopen) nOpen = nOpen === b.dataset.nopen ? "" : b.dataset.nopen;
+  if (b.dataset.nread) {
+    const id = b.dataset.nread; nRead[id] = !nRead[id]; LS.set("cq_nread", nRead);
+    if (nRead[id]) { const ls = nTab === "plan" ? planLessons() : commLessons(); const i = ls.findIndex((l) => l.id === id); nOpen = (ls[i + 1] || {}).id || ""; }
+    renderNotes();
+    const el = document.querySelector(".lesson.open"); if (el) el.scrollIntoView({ block: "start" }); else window.scrollTo(0, y);
+    return;
+  }
+  if (b.dataset.ngo) {
+    const l = (nTab === "plan" ? planLessons() : commLessons()).find((x) => x.id === b.dataset.ngo);
+    if (l.go.plan) { pScope = { ...l.go.plan }; LS.set("cq_pscope", pScope); appMode = "plan"; LS.set("cq_app", "plan"); startPRound(); }
+    else { scope = { lv: l.go.comm, ca: "all" }; LS.set("cq_scope", scope); appMode = "comm"; LS.set("cq_app", "comm"); startRound(); }
+    return;
+  }
+  renderNotes();
+  if (b.dataset.nopen) { const el = document.querySelector(".lesson.open"); if (el) el.scrollIntoView({ block: "start" }); else window.scrollTo(0, y); }
+  else window.scrollTo(0, y);
+});
+document.addEventListener("change", (e) => {
+  const k = e.target.dataset && e.target.dataset.ncover; if (!k) return;
+  nCover[k] = e.target.checked;
+  const body = e.target.closest(".lesson-b").querySelector(".lesson-body");
+  body.classList.toggle("covered", nCover[k]); body.querySelectorAll("td.rev").forEach((x) => x.classList.remove("rev"));
+});
 
 
 boot();
