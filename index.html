@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2f6d5a">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="佣金速記">
 <meta name="robots" content="noindex, nofollow">
@@ -13,11 +14,13 @@
 <title>佣金速記</title>
 <style>
 :root{
-  --bg:#f5f3ee; --surface:#ffffff; --surface2:#efece5; --ink:#1b1d22; --muted:#6c6f77;
-  --line:#e3dfd6; --accent:#2f6d5a; --accent-ink:#ffffff; --accent-soft:#dcebe5;
-  --good:#1d8a57; --good-soft:#dff3e8; --bad:#cf3a3a; --bad-soft:#fbe4e2;
-  --shadow:0 1px 2px rgba(20,20,20,.05),0 4px 14px rgba(20,20,20,.05);
-  --radius:16px;
+  --bg:#ffffff; --surface:#ffffff; --surface2:#f3f3f5; --ink:#333333; --muted:#6b6b72;
+  --line:#e6e6eb; --accent:#c4090f; --accent-ink:#ffffff; --accent-soft:#fdf0f0;
+  --good:#1e8a4c; --good-soft:#e5f5ec; --bad:#d93025; --bad-soft:#fdecea;
+  --row:#fafafb; --info:#eef4fa;
+  --cht:#0468b6; --twm:#d95e00; --fet:#e62310;
+  --shadow:0 1px 2px rgba(0,0,0,.04);
+  --radius:12px;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -46,7 +49,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
 /* header */
 .top{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 14px}
-.brand{font-weight:800;font-size:22px;letter-spacing:.5px}
+.brand{font-weight:800;font-size:22px;letter-spacing:.5px;border-left:4px solid var(--accent);padding-left:10px;line-height:1.25}
 .brand small{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
 .pill{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--surface2);color:var(--muted)}
 .pill.warn{background:#fff1cc;color:#7a5a00}
@@ -64,13 +67,13 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   background:var(--surface);font-weight:600;font-size:15px;transition:all .12s;
 }
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.chip.c-cht[aria-pressed="true"]{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
-.chip.c-twm[aria-pressed="true"]{background:#e8710a;border-color:#e8710a;color:#fff}
-.chip.c-fet[aria-pressed="true"]{background:#d11f3a;border-color:#d11f3a;color:#fff}
+.chip.c-cht[aria-pressed="true"]{background:var(--cht);border-color:var(--cht);color:#fff}
+.chip.c-twm[aria-pressed="true"]{background:var(--twm);border-color:var(--twm);color:#fff}
+.chip.c-fet[aria-pressed="true"]{background:var(--fet);border-color:var(--fet);color:#fff}
 .chip.sm{min-height:34px;padding:5px 11px;font-size:14px;border-radius:10px}
-.seg{display:flex;background:var(--surface2);border-radius:12px;padding:4px;gap:4px}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
 .seg button{flex:1;min-height:38px;border-radius:9px;font-weight:600;font-size:15px;color:var(--muted)}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 details.plans summary{list-style:none;cursor:pointer;font-size:14px;color:var(--accent);font-weight:600;padding:4px 0}
 details.plans summary::-webkit-details-marker{display:none}
 .plan-group{margin-top:10px}
@@ -78,7 +81,7 @@ details.plans summary::-webkit-details-marker{display:none}
 
 .btn{
   display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;
-  border-radius:14px;font-weight:700;font-size:17px;background:var(--accent);color:var(--accent-ink);
+  border-radius:12px;font-weight:700;font-size:17px;background:var(--accent);color:var(--accent-ink);
 }
 .btn:disabled{opacity:.4}
 .btn.ghost{background:var(--surface2);color:var(--ink)}
@@ -110,7 +113,7 @@ details.plans summary::-webkit-details-marker{display:none}
 .prog i{display:block;height:100%;background:var(--accent);border-radius:8px;transition:width .25s}
 .qcount{font-size:14px;color:var(--muted);font-weight:600;white-space:nowrap}
 .qcard{
-  background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
   padding:20px 18px 18px;position:relative;overflow:hidden;margin-bottom:14px;
 }
 .qcard::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--cc,var(--accent))}
@@ -130,7 +133,7 @@ details.plans summary::-webkit-details-marker{display:none}
 .qask{margin-top:14px;font-size:15px;color:var(--muted)}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .opt{
-  min-height:68px;border-radius:16px;background:var(--surface);border:2px solid var(--line);
+  min-height:68px;border-radius:12px;background:var(--surface);border:2px solid var(--line);
   font-size:24px;font-weight:800;box-shadow:var(--shadow);transition:transform .08s,background .12s;
   display:flex;align-items:center;justify-content:center;gap:4px;
 }
@@ -149,7 +152,7 @@ details.plans summary::-webkit-details-marker{display:none}
 /* tables */
 .rt{width:100%;border-collapse:separate;border-spacing:0;font-size:15px}
 .rt th,.rt td{padding:9px 6px;text-align:center;border-bottom:1px solid var(--line)}
-.rt th{font-size:12px;color:var(--muted);font-weight:700}
+.rt th{font-size:12px;color:var(--muted);font-weight:700;background:var(--row)}
 .rt td:first-child,.rt th:first-child{text-align:left;color:var(--muted);font-weight:600;font-size:14px}
 .rt tr:last-child td{border-bottom:0}
 .rt td.v{font-weight:700}
@@ -248,8 +251,8 @@ details.plans summary::-webkit-details-marker{display:none}
 .lv-row:last-child{border-bottom:0}
 .hist-item .when{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}
 .mode-mini,.trap-mini{white-space:nowrap}
-.common{background:var(--accent-soft);border-radius:12px;padding:10px 14px;margin:0 0 12px;font-size:14px;line-height:1.6}
-.common .ct{display:block;font-weight:800;color:var(--accent);margin-bottom:2px}
+.common{background:var(--info);border-radius:12px;padding:10px 14px;margin:0 0 12px;font-size:14px;line-height:1.6}
+.common .ct{display:block;font-weight:800;color:var(--ink);margin-bottom:2px}
 .common ul{margin:0;padding-left:18px}
 .common li{margin:2px 0}
 .common b{color:var(--accent)}
@@ -260,9 +263,9 @@ details.plans summary::-webkit-details-marker{display:none}
 .cbtn small{font-size:12px;font-weight:600;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
 .cbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .cbtn[aria-pressed="true"] small{color:inherit;opacity:.85}
-.cbtn.c-twm[aria-pressed="true"]{background:#e8710a;border-color:#e8710a;color:#fff}
-.cbtn.c-cht[aria-pressed="true"]{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
-.cbtn.c-fet[aria-pressed="true"]{background:#d11f3a;border-color:#d11f3a;color:#fff}
+.cbtn.c-twm[aria-pressed="true"]{background:var(--twm);border-color:var(--twm);color:#fff}
+.cbtn.c-cht[aria-pressed="true"]{background:var(--cht);border-color:var(--cht);color:#fff}
+.cbtn.c-fet[aria-pressed="true"]{background:var(--fet);border-color:var(--fet);color:#fff}
 .cbtn:disabled{opacity:.35;cursor:not-allowed}
 .cbtn.dim{opacity:.55;border-style:dashed}
 .res-card{border-top:6px solid var(--accent)}
@@ -344,7 +347,7 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 .jump div{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line)}
 .jump b{background:var(--accent-soft);color:var(--accent);padding:4px 10px;border-radius:8px}
 .jump small{flex-basis:100%;color:var(--muted)}
-.cmg td.cm{padding:4px 2px;background:color-mix(in srgb,var(--accent) calc(var(--heat) * 0.35%),var(--surface))}
+.cmg td.cm{padding:4px 2px;background:color-mix(in srgb,var(--heat-c,#55555b) calc(var(--heat) * 0.22%),var(--surface))}
 .cmg .ln{font-size:12px;font-weight:700;line-height:1.45}
 .cmg .ln.miss{opacity:.35}
 .cmg .ln.eq{text-decoration:underline;text-underline-offset:2px}
@@ -352,7 +355,7 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 .cmg .ln.me{background:var(--ink);color:var(--bg)!important;border-radius:4px}
 .cmg td.cur{outline:2.5px solid var(--ink);outline-offset:-2px}
 .cmg tr.currow td.rh{color:var(--ink)}
-.l-cht{color:#1f5fbf}.l-twm{color:#d0630a}.l-fet{color:#d11f3a}
+.l-cht{color:var(--cht)}.l-twm{color:var(--twm)}.l-fet{color:var(--fet)}
 .stack-key{font-size:12px;color:var(--muted);margin:0 2px 8px;line-height:1.5}
 .posmap summary{cursor:pointer;font-weight:700;font-size:14px;margin-bottom:8px}
 .lesson{background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-bottom:10px;overflow:hidden}
@@ -364,7 +367,7 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 .lt small{display:block;font-size:11px;font-weight:700;color:var(--accent)}
 .lst{color:var(--muted);font-weight:800}
 .lesson-b{padding:0 10px 14px}
-.keybox{background:var(--accent-soft);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.keybox{background:var(--info);border-radius:12px;padding:10px 12px;margin-bottom:8px}
 .keybox ol{margin:6px 0 0;padding-left:20px;font-size:14px;line-height:1.6}
 .memo{font-size:14px;font-weight:700;background:#fff1cc;color:#7a5a00;padding:8px 10px;border-radius:10px}
 .lesson-body .card{box-shadow:none;padding:12px 8px}
@@ -388,7 +391,7 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 .scen-q{font-size:16px;color:var(--ink);font-weight:700;margin-top:10px;line-height:1.5}
 .tin{display:block;width:100%;min-width:0;font-size:13px;font-weight:700;padding:5px 2px;text-align:center;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);margin:1px 0;font-variant-numeric:tabular-nums}
 .tin:focus{outline:2px solid var(--accent);outline-offset:0}
-.tin.lb-cht{border-left:4px solid #1f5fbf}.tin.lb-twm{border-left:4px solid #e8710a}.tin.lb-fet{border-left:4px solid #d11f3a}
+.tin.lb-cht{border-left:4px solid var(--cht)}.tin.lb-twm{border-left:4px solid var(--twm)}.tin.lb-fet{border-left:4px solid var(--fet)}
 .tin.ok{border-color:var(--good);background:var(--good-soft);color:var(--good)}
 .tin.ng{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
 .corr{display:block;font-size:11px;font-weight:800;color:var(--bad);line-height:1.2}
@@ -1678,7 +1681,7 @@ function planBlocks() {
     <div><b>學生 699</b><span>＝</span><b>一般 999</b><small>60GB／不降速／網外 120</small></div></div>
     <div class="vg-note">台哥大、遠傳；只有 30 期，折扣請洽門市，預繳 0</div></div>`;
   out.g4 = `<div class="card"><p class="sec-title">4G 易混：學生 388</p>
-    <table class="vg"><thead><tr><th class="rh"></th><th style="background:#e8710a">台哥大</th><th style="background:#d11f3a">遠傳</th></tr></thead><tbody>
+    <table class="vg"><thead><tr><th class="rh"></th><th style="background:#d95e00">台哥大</th><th style="background:#e62310">遠傳</th></tr></thead><tbody>
     <tr><td class="rh">期數</td><td class="hl">30</td><td class="hl">24</td></tr>
     <tr><td class="rh">傳輸量</td><td class="hl">6GB<small>前6個月吃到飽</small></td><td class="hl">5GB</td></tr>
     <tr><td class="rh">網內</td><td class="hl">免費</td><td class="hl">前3分免費<small>＋網內30分</small></td></tr>
