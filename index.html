@@ -333,6 +333,9 @@ b.pos{color:var(--good)} b.neg{color:var(--bad)}
 .vg td{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 3px;text-align:center;line-height:1.35;vertical-align:middle;font-variant-numeric:tabular-nums;word-break:break-word}
 .vg td small{display:block;font-size:11px;color:var(--muted);font-weight:500}
 .vg td .big{font-size:18px}
+.vg.sp th{background:var(--surface2);color:var(--muted)}
+.vg.sp th small{display:block;font-weight:500;font-size:10px}
+.vg.sp th.rh,.vg.sp td.rh{width:78px}
 .vg td.eq3,.lg.eq3{background:var(--surface2);border-color:transparent;color:var(--muted)}
 .vg td.eq2,.lg.eq2{background:#e6f4ec;border-color:#bfe3cd}
 .vg td.hl,.lg.hl{background:#fff1cc;border-color:#f0d27a;font-weight:800}
@@ -1392,9 +1395,11 @@ const weakPlan = () => PITEMS.filter((it) => { const st = pStat[it.key]; return 
 function pPool(sc) {
   if (sc.weak) return weakPlan();
   if (sc.scen) return scenPool();
+  if (sc.sp) return PITEMS.filter(isSpecial);
   return PITEMS.filter((it) => (sc.price ? it.price === sc.price && it.net === "5G" : (sc.ca === "all" || it.c.id === sc.ca) && (sc.net === "all" || it.net === sc.net)));
 }
-const pScopeLabel = (sc) => (sc.weak ? "資費弱點複習" : sc.scen ? "情境題" : sc.price ? `5G ${sc.price}・三家` : `${CA_SHORT[sc.ca]}・${sc.net === "all" ? "4G＋5G" : sc.net}`);
+const isSpecial = (it) => it.net === "4G" || !!it.student;   // 特殊方案：4G 方案＋學生方案
+const pScopeLabel = (sc) => (sc.weak ? "資費弱點複習" : sc.scen ? "情境題" : sc.sp ? "特殊方案（4G・學生）" : sc.price ? `5G ${sc.price}・三家` : `${CA_SHORT[sc.ca]}・${sc.net === "all" ? "4G＋5G" : sc.net}`);
 // 各電信輪流、相鄰題目盡量不同電信與期數
 function pBuild(pool, n) {
   const byC = new Map();
@@ -1585,17 +1590,18 @@ function renderPSheet() {
   $("#psheet").innerHTML = `
     <h3>資費默寫範圍</h3>
     <p class="sec-title">電信</p>
-    <div class="seg">${["all", "cht", "twm", "fet"].map((id) => segBtn("pca", id, pDraft.price || pDraft.scen || pDraft.weak ? null : pDraft.ca, CA_SHORT[id], false)).join("")}</div>
+    <div class="seg">${["all", "cht", "twm", "fet"].map((id) => segBtn("pca", id, pDraft.price || pDraft.scen || pDraft.weak || pDraft.sp ? null : pDraft.ca, CA_SHORT[id], false)).join("")}</div>
     <p class="sec-title" style="margin-top:12px">網路</p>
-    <div class="seg">${[["5G", "5G"], ["4G", "4G"], ["all", "4G＋5G"]].map(([v, l]) => segBtn("pnet", v, pDraft.price || pDraft.scen || pDraft.weak ? null : pDraft.net, l, false)).join("")}</div>
+    <div class="seg">${[["5G", "5G"], ["4G", "4G"], ["all", "4G＋5G"]].map(([v, l]) => segBtn("pnet", v, pDraft.price || pDraft.scen || pDraft.weak || pDraft.sp ? null : pDraft.net, l, false)).join("")}</div>
     <p class="sec-title" style="margin-top:12px">實戰與複習</p>
     <div class="calc-grid g2">
+      <button class="cbtn" data-psp="1" aria-pressed="${!!pDraft.sp}" style="grid-column:1/-1">⭐ 特殊方案<small>4G＋學生，共 ${cnt({ sp: true })} 個</small></button>
       <button class="cbtn" data-pscen="1" aria-pressed="${!!pDraft.scen}">🧑‍💼 情境題<small>佣金＋最高比較</small></button>
       <button class="cbtn" data-pweak="1" aria-pressed="${!!pDraft.weak}" ${weakPlan().length ? "" : "disabled"}>弱點複習<small>${weakPlan().length ? `${weakPlan().length} 個方案` : "目前沒有"}</small></button>
     </div>
     <p class="sec-title" style="margin-top:12px">依資費練習（三家同資費・攜碼／新申辦・期數交錯）</p>
     <div class="calc-grid g3">${PRICES.map((p) => `<button class="cbtn" data-pprice="${p}" aria-pressed="${pDraft.price === p}">5G ${p}<small>${cnt({ price: p })} 個方案</small></button>`).join("")}</div>
-    <p class="hint" style="text-align:left">${pDraft.scen ? "情境題每輪 8 題：客人攜碼情境考你的佣金，另有「哪一家佣金最高」比較題。" : `目前範圍共 ${cnt(pDraft)} 個方案，每輪最多 ${P_ROUND} 題。選電信或網路會取消依資費。`}</p>
+    <p class="hint" style="text-align:left">${pDraft.scen ? "情境題每輪 8 題：客人攜碼情境考你的佣金，另有「哪一家佣金最高」比較題。" : pDraft.sp ? `特殊方案共 ${cnt(pDraft)} 個（三家 4G 方案＋學生方案），每輪最多 ${P_ROUND} 題；遠傳 4G 攜碼和新申辦分開出題。` : `目前範圍共 ${cnt(pDraft)} 個方案，每輪最多 ${P_ROUND} 題。選電信或網路會取消依資費。`}</p>
     <button class="btn" id="pApply" style="margin-top:12px" ${cnt(pDraft) ? "" : "disabled"}>開始練習</button>
     <button class="btn ghost" id="pClose" style="margin-top:10px">取消</button>`;
 }
@@ -1604,12 +1610,13 @@ $("#psheetBg").addEventListener("click", (e) => {
   const t = e.target;
   if (t.id === "psheetBg" || t.id === "pClose") return $("#psheetBg").classList.add("hidden");
   const b = t.closest("button"); if (!b) return;
-  const clr = () => { delete pDraft.scen; delete pDraft.weak; };
+  const clr = () => { delete pDraft.scen; delete pDraft.weak; delete pDraft.sp; };
   if (b.dataset.pca) { pDraft.ca = b.dataset.pca; pDraft.price = null; clr(); }
   else if (b.dataset.pnet) { pDraft.net = b.dataset.pnet; pDraft.price = null; clr(); }
   else if (b.dataset.pprice) { pDraft.price = Number(b.dataset.pprice); clr(); }
   else if (b.dataset.pscen) { clr(); pDraft.scen = true; pDraft.price = null; }
   else if (b.dataset.pweak && !b.disabled) { clr(); pDraft.weak = true; pDraft.price = null; }
+  else if (b.dataset.psp) { clr(); pDraft.sp = true; pDraft.price = null; }
   else if (b.id === "pApply") { pScope = { ...pDraft }; LS.set("cq_pscope", pScope); $("#psheetBg").classList.add("hidden"); return startPRound(); }
   else return;
   renderPSheet();
@@ -1677,6 +1684,15 @@ function planBlocks() {
     <div class="jump"><div><b>學生 599</b><span>＝</span><b>一般 799</b><small>36GB／21Mbps／網外 90</small></div>
     <div><b>學生 699</b><span>＝</span><b>一般 999</b><small>60GB／不降速／網外 120</small></div></div>
     <div class="vg-note">台哥大、遠傳；只有 30 期</div></div>`;
+  out.special = CAR_ORDER.map((id) => {
+    const its = PITEMS.filter((x) => x.c.id === id && isSpecial(x) && x.ty === "攜碼");
+    if (!its.length) return "";
+    const nw = PITEMS.filter((x) => x.c.id === id && isSpecial(x) && x.ty !== "攜碼");
+    return `<div class="card"><p class="sec-title" style="color:${its[0].c.color}">${esc(its[0].c.name)}・特殊方案<small class="sub">（攜碼${nw.length ? `；新申辦另有 ${nw.length} 個，差在國內通話金` : ""}）</small></p>
+    <table class="vg sp"><thead><tr><th class="rh">方案</th><th>傳輸量<small>↓降速後</small></th><th>網內</th><th>網外<small>市話</small></th></tr></thead><tbody>
+    ${its.map((x) => `<tr><td class="rh">${esc(x.name.replace(/（(\d+)）/, "<small>（$1）</small>")).replace(/&lt;(\/?)small&gt;/g, "<$1small>")}</td><td><b>${esc(x.gb)}</b>${x.slow != null ? `<small>↓ ${esc(x.slow)}</small>` : ""}</td><td><small>${esc(x.on)}</small></td><td><b>${x.off}</b>${x.land != null ? `<small>市話 ${x.land}</small>` : ""}${x.extra ? `<small>${esc(x.extra[0])} ${x.extra[1]}</small>` : ""}</td></tr>`).join("")}
+    </tbody></table></div>`;
+  }).join("");
   out.g4 = `<div class="card"><p class="sec-title">4G 易混：學生 388</p>
     <table class="vg"><thead><tr><th class="rh"></th><th style="background:#d95e00">台哥大</th><th style="background:#e62310">遠傳</th></tr></thead><tbody>
     <tr><td class="rh">期數</td><td class="hl">30</td><td class="hl">24</td></tr>
@@ -1721,7 +1737,7 @@ function planLessons() {
     { id: "p1", lv: "入門", title: "認識版面＋傳輸量階梯", key: ["三家由左到右永遠是 中華｜台哥大｜遠傳，資費由上往下 599 → 1399", "傳輸量三家的 GB 數都一樣：24、36、60、100、吃到飽", "到量後 4G：599 降速 12Mbps、799 降速 21Mbps，999 以上不降速"], memo: "「二四、三六、六十、一百、吃到飽」；12、21 數字對調", body: B.data, go: { plan: { ca: "all", net: "5G", price: null } } },
     { id: "p2", lv: "入門", title: "通話：中華剛好一半", key: ["台哥大＝遠傳：網內免費，網外 60、90、120、160、220", "中華網外 30、45、60、80、110＝另外兩家的一半", "中華網內 599 每通前 5 分、799 前 10 分，999 以上免費；另有市話 40、60、75、100、140"], memo: "台遠「60 起跳，每級加 30、30、40、60」；中華「全部砍半」", body: B.call, go: { plan: { ca: "all", net: "5G", price: null } } },
     { id: "p3", lv: "基礎", title: "期數地圖：哪些期數有、哪些沒有", key: ["599、799 三家都只有 24、30 期；999 三家都有 36 期", "中華 1199 只有 30 期", "中華 1399 多一個 36 期，台遠的 1399 只有 24、30 期"], memo: "「中華 1199 缺 24、1399 多 36」", body: B.per, go: { plan: { ca: "cht", net: "5G", price: null } } },
-    { id: "p6", lv: "補充", title: "學生方案與 4G 易混", key: ["學生方案往上跳一級：學生 599＝一般 799、學生 699＝一般 999", "學生 388 台哥大和遠傳每一項都不一樣", "遠傳 299、399 各有兩個版本"], memo: "「學生多一級」", body: B.student + B.g4, go: { plan: { ca: "all", net: "4G", price: null } } }
+    { id: "p6", lv: "補充", title: "特殊方案：學生與 4G", key: ["學生方案往上跳一級：學生 599＝一般 799、學生 699＝一般 999", "學生 388 台哥大和遠傳每一項都不一樣", "遠傳 299、399 各有兩個版本；中華 4G 只有 199（36）和吃到飽 699（30）", "資費默寫範圍選「⭐ 特殊方案」可以專練這些方案"], memo: "「學生多一級」", body: B.student + B.g4 + B.special, go: { plan: { sp: true } } }
   ];
 }
 function commLessons() {
@@ -1987,7 +2003,7 @@ function tableChooser() {
 const DAYS = [
   [{ t: "read", tab: "plan", ids: ["p1", "p2"], label: "讀資費講義第 1、2 課" }, { t: "table", k: "plan-gb", label: "整表默寫：傳輸量" }, { t: "plan", n: 2, label: "資費默寫 2 輪（三家・5G）" }],
   [{ t: "read", tab: "plan", ids: ["p3"], label: "讀資費講義第 3 課（期數地圖）" }, { t: "table", k: "plan-off", label: "整表默寫：網外分鐘" }, { t: "plan", n: 2, label: "資費默寫 2 輪" }],
-  [{ t: "read", tab: "plan", ids: ["p6"], label: "讀資費講義第 4 課（學生方案與 4G）" }, { t: "plan", n: 2, scope: { ca: "all", net: "4G", price: null }, label: "資費默寫 2 輪（三家・4G）" }],
+  [{ t: "read", tab: "plan", ids: ["p6"], label: "讀資費講義第 4 課（學生方案與 4G）" }, { t: "plan", n: 2, scope: { sp: true }, label: "資費默寫 2 輪（⭐ 特殊方案）" }],
   [{ t: "table", k: "plan-gb", label: "整表默寫：傳輸量（複習）" }, { t: "table", k: "plan-off", label: "整表默寫：網外分鐘（複習）" }, { t: "plan", n: 1, scope: { ca: "all", net: "5G", price: 1199 }, label: "資費默寫：依資費 1199 一輪" }],
   [{ t: "read", tab: "comm", ids: ["c1", "c2"], label: "讀佣金講義第 1、2 課" }, { t: "table", k: "comm-1-0", label: "整表默寫：核心層攜碼" }, { t: "comm", lv: 1, n: 2, label: "佣金核心層 2 輪（四選一可以）" }],
   [{ t: "read", tab: "comm", ids: ["c3"], label: "讀佣金講義第 3 課（同數字）" }, { t: "table", k: "comm-1-1", label: "整表默寫：核心層新辦" }, { t: "table", k: "comm-1-2", label: "整表默寫：核心層續約" }, { t: "comm", lv: 1, n: 2, label: "佣金核心層 2 輪（改用輸入數字）" }],
@@ -2006,7 +2022,7 @@ function taskProgress(k) {
   const since = (h) => h.at >= dayState.start;
   switch (k.t) {
     case "read": { const n = k.ids.filter((id) => nRead[id]).length; return [n, k.ids.length]; }
-    case "plan": return [Math.min(pHist.filter((h) => since(h) && !h.sc.scen && !h.sc.weak && (!k.scope || h.sc.price === k.scope.price)).length, k.n), k.n];
+    case "plan": return [Math.min(pHist.filter((h) => since(h) && !h.sc.scen && !h.sc.weak && (!k.scope || (k.scope.sp ? h.sc.sp : h.sc.price === k.scope.price))).length, k.n), k.n];
     case "table": return [Math.min(tHist.filter((h) => since(h) && h.key === k.k).length, 1), 1];
     case "comm": return [Math.min(hist.filter((h) => since(h) && h.lv === k.lv).length, k.n), k.n];
     case "pass": return [lvProg[k.lv] && lvProg[k.lv].passed ? 1 : 0, 1];
