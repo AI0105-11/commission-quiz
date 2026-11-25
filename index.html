@@ -1365,19 +1365,28 @@ function splitData(d) {
   b = b.replace(/kbps/i, "kbps").replace("降速", "降速 ");
   return { gb, slow: b.trim() };
 }
+// 網內拆成「每通免費」與「網內贈送分鐘」兩格（例：遠傳學生 388 前3分鐘免費＋網內30分鐘、中華 699 每通前10分免費＋再送45分）
+function splitOn(on) {
+  let m = on.match(/^網內\s*(\d+)\s*分鐘$/);
+  if (m) return { onF: null, onB: Number(m[1]) };
+  m = on.match(/^(.+?)＋(?:網內|再送)\s*(\d+)\s*分(?:鐘)?$/);
+  if (m) return { onF: m[1], onB: Number(m[2]) };
+  return { onF: on, onB: null };
+}
 function buildPItems() {
   PITEMS = [];
   if (!DATA.plans) return;
   for (const g of DATA.plans.groups) {
     const c = DATA.carriers.find((x) => x.id === g.c);
-    for (const x of g.items) PITEMS.push({ ...x, ...splitData(x.data), key: `${g.c}|${g.ty}|${x.name}`, c, ty: g.ty, net: g.net });
+    for (const x of g.items) PITEMS.push({ ...x, ...splitData(x.data), ...splitOn(x.on), key: `${g.c}|${g.ty}|${x.name}`, c, ty: g.ty, net: g.net });
   }
 }
 function pFields(it) {
   const f = [];
   f.push({ k: "gb", label: "傳輸量", kind: "choice", ans: it.gb });
   if (it.slow != null) f.push({ k: "slow", label: "降速後", kind: "choice", ans: it.slow });
-  f.push({ k: "on", label: "網內", kind: "choice", ans: it.on });
+  if (it.onF != null) f.push({ k: "onF", label: it.onB != null ? "網內（每通）" : "網內", kind: "choice", ans: it.onF });
+  if (it.onB != null) f.push({ k: "onB", label: "網內贈送", kind: "num", ans: it.onB, unit: "分鐘" });
   f.push({ k: "off", label: "網外", kind: "num", ans: it.off, unit: "分鐘" });
   if (it.land != null) f.push({ k: "land", label: "市話", kind: "num", ans: it.land, unit: "分鐘" });
   if (it.extra) f.push({ k: "extra", label: it.extra[0], kind: "num", ans: it.extra[1], unit: "元" });
@@ -1690,7 +1699,7 @@ function planBlocks() {
     const nw = PITEMS.filter((x) => x.c.id === id && isSpecial(x) && x.ty !== "攜碼");
     return `<div class="card"><p class="sec-title" style="color:${its[0].c.color}">${esc(its[0].c.name)}・特殊方案<small class="sub">（攜碼${nw.length ? `；新申辦另有 ${nw.length} 個，差在國內通話金` : ""}）</small></p>
     <table class="vg sp"><thead><tr><th class="rh">方案</th><th>傳輸量<small>↓降速後</small></th><th>網內</th><th>網外<small>市話</small></th></tr></thead><tbody>
-    ${its.map((x) => `<tr><td class="rh">${esc(x.name.replace(/（(\d+)）/, "<small>（$1）</small>")).replace(/&lt;(\/?)small&gt;/g, "<$1small>")}</td><td><b>${esc(x.gb)}</b>${x.slow != null ? `<small>↓ ${esc(x.slow)}</small>` : ""}</td><td><small>${esc(x.on)}</small></td><td><b>${x.off}</b>${x.land != null ? `<small>市話 ${x.land}</small>` : ""}${x.extra ? `<small>${esc(x.extra[0])} ${x.extra[1]}</small>` : ""}</td></tr>`).join("")}
+    ${its.map((x) => `<tr><td class="rh">${esc(x.name.replace(/（(\d+)）/, "<small>（$1）</small>")).replace(/&lt;(\/?)small&gt;/g, "<$1small>")}</td><td><b>${esc(x.gb)}</b>${x.slow != null ? `<small>↓ ${esc(x.slow)}</small>` : ""}</td><td>${x.onF != null ? `<small>${esc(x.onF)}</small>` : ""}${x.onB != null ? `<b>${x.onF != null ? "＋" : ""}網內 ${x.onB} 分</b>` : ""}</td><td><b>${x.off}</b>${x.land != null ? `<small>市話 ${x.land}</small>` : ""}${x.extra ? `<small>${esc(x.extra[0])} ${x.extra[1]}</small>` : ""}${x.note ? `<small>⚠ ${esc(x.note)}</small>` : ""}</td></tr>`).join("")}
     </tbody></table></div>`;
   }).join("");
   out.g4 = `<div class="card"><p class="sec-title">4G 易混：學生 388</p>
